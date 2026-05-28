@@ -1,0 +1,27 @@
+# Virtual environment
+venv/
+venv311/
+
+# Data files (terlalu besar untuk GitHub)
+data/chroma/
+data/raw_articles.json
+
+# Tapi tetap track struktur folder
+!data/.gitkeep
+
+# Environment variables (jangan di-push API key!)
+.env
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# VS Code
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
