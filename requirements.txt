@@ -1,0 +1,9 @@
+wikipedia-api
+sentence-transformers
+chromadb
+groq
+fastapi
+uvicorn
+python-dotenv
+tqdm
+torch

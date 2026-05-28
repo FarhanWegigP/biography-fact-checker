@@ -29,6 +29,7 @@ COLLECTION  = "biographies"
 EMBED_MODEL = "paraphrase-multilingual-MiniLM-L12-v2"
 GROQ_MODEL  = "llama-3.3-70b-versatile"
 TOP_K       = 5
+MIN_SCORE   = 0.25  # threshold minimum similarity — di bawah ini dianggap tidak relevan
 
 # ─────────────────────────────────────────────
 # Init
@@ -60,6 +61,10 @@ class FactCheckRequest(BaseModel):
     klaim: str
     top_k: int = TOP_K
     strategi: str = "cot"  # zero_shot | cot | structured
+
+class SearchRequest(BaseModel):
+    query: str
+    top_k: int = 5
 
 class EvidenceItem(BaseModel):
     teks: str
@@ -232,6 +237,8 @@ def cek_fakta(req: FactCheckRequest):
     evidence = []
     for doc, meta, dist in zip(docs, metas, distances):
         score = 1 - (dist / 2)
+        if score < MIN_SCORE:
+            continue  # skip evidence yang tidak relevan
         evidence.append({
             "text"   : doc,
             "title"  : meta["title"],
@@ -296,15 +303,15 @@ def cek_fakta(req: FactCheckRequest):
 
 
 @app.post("/cari")
-def cari(query: str, top_k: int = 5):
+def cari(req: SearchRequest):
     query_vec = model.encode(
-        [query],
+        [req.query],
         normalize_embeddings=True,
         device=device,
     ).tolist()
     result = collection.query(
         query_embeddings=query_vec,
-        n_results=top_k,
+        n_results=req.top_k,
         include=["documents", "metadatas", "distances"],
     )
     hits = []
@@ -313,14 +320,17 @@ def cari(query: str, top_k: int = 5):
         result["metadatas"][0],
         result["distances"][0],
     ):
+        score = round(1 - dist / 2, 4)
+        if score < MIN_SCORE:
+            continue
         hits.append({
             "teks" : doc,
             "judul": meta["title"],
-            "skor" : round(1 - dist / 2, 4),
+            "skor" : score,
         })
     return hits
 
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("api:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("api:app", host="0.0.0.0", port=8001, reload=True)

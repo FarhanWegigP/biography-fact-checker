@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biography Fact Checker — Sistem RAG Penilai Klaim Fakta Tokoh</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="glass-bg"></div>
+    <div class="glowing-orb orb-1"></div>
+    <div class="glowing-orb orb-2"></div>
+
+    <div class="app-container">
+        <!-- HEADER -->
+        <header class="app-header">
+            <div class="logo-area">
+                <div class="logo-icon"><i class="fa-solid fa-user-shield"></i></div>
+                <div class="logo-text">
+                    <h1>BioFactChecker</h1>
+                    <p>Sistem Verifikasi Fakta Biografi Berbasis RAG</p>
+                </div>
+            </div>
+            <div class="api-status-badge" id="api-status">
+                <span class="status-dot"></span>
+                <span class="status-text">Memeriksa API...</span>
+            </div>
+        </header>
+
+        <!-- MAIN LAYOUT -->
+        <main class="app-main">
+            <!-- LEFT PANEL: INPUT & CONFIG -->
+            <section class="control-panel">
+                <div class="glass-card">
+                    <h2 class="card-title"><i class="fa-solid fa-magnifying-glass-chart"></i> Verifikasi Klaim Baru</h2>
+                    <form id="factcheck-form">
+                        <div class="input-group">
+                            <label for="klaim">Klaim Biografi (Bahasa Indonesia)</label>
+                            <textarea id="klaim" placeholder="Contoh: BJ Habibie lahir di Parepare pada tanggal 25 Juni 1936 dan merupakan Presiden Indonesia ke-3." required></textarea>
+                        </div>
+                        
+                        <div class="settings-row">
+                            <div class="input-group">
+                                <label for="strategi">Strategi Penalaran</label>
+                                <select id="strategi">
+                                    <option value="cot" selected>Chain-of-Thought (CoT)</option>
+                                    <option value="structured">Structured Output (JSON)</option>
+                                    <option value="zero_shot">Zero-Shot (Instan)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button type="submit" id="btn-submit">
+                            <span class="btn-text">Cek Kebenaran Klaim</span>
+                            <span class="btn-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></span>
+                            <span class="spinner hidden"><i class="fa-solid fa-circle-notch fa-spin"></i></span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- INDEXED FIGURES / DATABASE BROWSER -->
+                <div class="glass-card dataset-browser">
+                    <div class="dataset-header">
+                        <h2 class="card-title"><i class="fa-solid fa-database"></i> Indeks Tokoh Terdaftar</h2>
+                        <span class="count-badge" id="tokoh-count">0 tokoh</span>
+                    </div>
+                    <div class="search-box">
+                        <i class="fa-solid fa-search search-icon"></i>
+                        <input type="text" id="search-tokoh" placeholder="Cari nama tokoh di dataset...">
+                    </div>
+                    <div class="tokoh-list-container">
+                        <ul id="tokoh-list" class="tokoh-list">
+                            <li class="loading-item">Memuat database tokoh...</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- RIGHT PANEL: VERDICT & EVIDENCE -->
+            <section class="result-panel">
+                <!-- Welcome State -->
+                <div id="welcome-state" class="glass-card welcome-card">
+                    <div class="welcome-icon"><i class="fa-solid fa-magnifying-glass"></i></div>
+                    <h3>Masukkan Klaim Biografi</h3>
+                    <p>Sistem akan secara otomatis mengekstrak fakta, mencocokkannya ke database Wikipedia secara realtime menggunakan embedding cosine similarity, dan menyimpulkannya dengan Groq Llama-3.3-70b.</p>
+                    <div class="tips-box">
+                        <span class="tips-title"><i class="fa-solid fa-lightbulb"></i> Contoh Klaim Uji Coba:</span>
+                        <ul>
+                            <li><a href="#" class="sample-claim">Soekarno wafat pada tanggal 21 Juni 1970 di Jakarta.</a></li>
+                            <li><a href="#" class="sample-claim">Albert Einstein dianugerahi Nobel Fisika pada tahun 1921.</a></li>
+                            <li><a href="#" class="sample-claim">Joko Widodo merupakan lulusan dari Institut Teknologi Bandung.</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Loading State (Skeleton) -->
+                <div id="loading-state" class="skeleton-card hidden">
+                    <div class="skeleton-header">
+                        <div class="skeleton-line short"></div>
+                        <div class="skeleton-line long"></div>
+                    </div>
+                    <div class="skeleton-body">
+                        <div class="skeleton-box"></div>
+                        <div class="skeleton-line"></div>
+                        <div class="skeleton-line"></div>
+                        <div class="skeleton-line medium"></div>
+                    </div>
+                </div>
+
+                <!-- Error State -->
+                <div id="error-state" class="glass-card error-card hidden">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <h3>Terjadi Kesalahan</h3>
+                    <p id="error-msg">Tidak dapat terhubung ke server API.</p>
+                </div>
+
+                <!-- Success Result State -->
+                <div id="result-state" class="hidden">
+                    <!-- Verdict Card -->
+                    <div class="glass-card result-header-card" id="verdict-container">
+                        <div class="verdict-banner">
+                            <div class="verdict-status-icon" id="verdict-icon"></div>
+                            <div>
+                                <span class="verdict-label">Klaim Dinyatakan</span>
+                                <h3 id="verdict-title">DIDUKUNG</h3>
+                            </div>
+                        </div>
+                        <div class="verdict-confidence">
+                            <div class="confidence-label">
+                                <span>Tingkat Kepercayaan RAG</span>
+                                <span id="confidence-percentage">95%</span>
+                            </div>
+                            <div class="confidence-bar-bg">
+                                <div class="confidence-bar-fill" id="confidence-fill"></div>
+                            </div>
+                        </div>
+                        <p class="verdict-summary" id="verdict-summary"></p>
+                    </div>
+
+                    <!-- reasoning card (Chain of Thought) -->
+                    <div class="glass-card" id="reasoning-card">
+                        <h3 class="section-title"><i class="fa-solid fa-brain"></i> Alur Penalaran AI (CoT)</h3>
+                        <div class="reasoning-content" id="reasoning-content"></div>
+                    </div>
+
+                    <!-- evidence list -->
+                    <div class="evidence-section">
+                        <h3 class="section-title"><i class="fa-solid fa-book-bookmark"></i> Bukti Utama Terkait (RAG Context)</h3>
+                        <div class="evidence-grid" id="evidence-container">
+                            <!-- Dynamically loaded -->
+                        </div>
+                    </div>
+
+                    <!-- Performance metadata -->
+                    <footer class="perf-metadata">
+                        <span><i class="fa-solid fa-bolt"></i> Waktu Retrieval: <strong id="retrieval-time">0.0 ms</strong></span>
+                        <span><i class="fa-solid fa-microchip"></i> Waktu Inferensi Groq: <strong id="llm-time">0.0 ms</strong></span>
+                    </footer>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
