@@ -309,31 +309,32 @@ function renderResult(data) {
         document.getElementById("reasoning-card").classList.add("hidden");
     }
 
-    // 4. Render Evidence Cards (Only show the Top 1 most relevant to keep UI clean)
+    // 4. Render Evidence Cards
     if (data.bukti && data.bukti.length > 0) {
-        const topEvidence = data.bukti[0];
-        const highlightedText = highlightKeywords(topEvidence.teks, data.klaim);
-        const scorePercent = Math.round(topEvidence.skor * 100);
-        
-        evidenceContainer.innerHTML = `
+        evidenceContainer.innerHTML = data.bukti.map(evidence => {
+            const highlightedText = highlightKeywords(evidence.teks, data.klaim);
+            const scorePercent = Math.round(evidence.skor * 100);
+
+            return `
             <article class="evidence-card">
                 <div class="evidence-header">
                     <div class="evidence-source">
                         <span class="source-icon"><i class="fa-brands fa-wikipedia-w"></i></span>
-                        <span class="source-title">${topEvidence.judul}</span>
-                        <span class="source-section">${topEvidence.seksi}</span>
+                        <span class="source-title">${evidence.judul}</span>
+                        <span class="source-section">${evidence.seksi}</span>
                     </div>
                     <span class="evidence-score">${scorePercent}% Relevansi</span>
                 </div>
                 <p class="evidence-text">"... ${highlightedText} ..."</p>
                 <div class="evidence-footer">
-                    <a href="${topEvidence.url}" target="_blank" class="evidence-link">
+                    <a href="${evidence.url}" target="_blank" class="evidence-link">
                         Buka Artikel Wikipedia <i class="fa-solid fa-arrow-up-right-from-square"></i>
                     </a>
-                    <span class="evidence-lang">${topEvidence.bahasa}</span>
+                    <span class="evidence-lang">${evidence.bahasa}</span>
                 </div>
             </article>
-        `;
+            `;
+        }).join("");
     } else {
         evidenceContainer.innerHTML = `<div class="glass-card" style="text-align: center; color: var(--text-muted)">Tidak ada bukti relevan yang lolos threshold minimal.</div>`;
     }

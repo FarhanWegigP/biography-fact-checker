@@ -9,6 +9,7 @@ import os
 import json
 import time
 import re
+import unicodedata
 import torch
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
@@ -30,6 +31,28 @@ EMBED_MODEL = "paraphrase-multilingual-MiniLM-L12-v2"
 GROQ_MODEL  = "llama-3.3-70b-versatile"
 TOP_K       = 5
 MIN_SCORE   = 0.25  # threshold minimum similarity — di bawah ini dianggap tidak relevan
+RETRIEVAL_POOL = 50
+
+STOPWORDS = {
+    "apakah", "apa", "siapa", "kapan", "dimana", "di", "ke", "dari", "dan",
+    "atau", "yang", "adalah", "merupakan", "seorang", "lahir", "tanggal",
+    "pada", "tahun", "bulan", "hari", "benar", "bener", "tidak", "bukan",
+    "itu", "ini", "dia", "ia", "dengan", "sebagai", "dalam",
+}
+
+ALIASES = {
+    "jokowi": "Joko Widodo",
+    "sby": "Susilo Bambang Yudhoyono",
+    "ahok": "Basuki Tjahaja Purnama",
+    "anies": "Anies Baswedan",
+    "prabowo": "Prabowo Subianto",
+    "megawati": "Megawati Soekarnoputri",
+    "bung karno": "Soekarno",
+    "karno": "Soekarno",
+    "sukarno": "Soekarno",
+    "bung hatta": "Mohammad Hatta",
+    "hatta": "Mohammad Hatta",
+}
 
 # ─────────────────────────────────────────────
 # Init
@@ -42,6 +65,23 @@ print("Connecting to ChromaDB...")
 client     = chromadb.PersistentClient(path=CHROMA_DIR)
 collection = client.get_collection(name=COLLECTION)
 print(f"ChromaDB ready — {collection.count()} chunks")
+
+print("Building article title index...")
+_article_meta = collection.get(include=["metadatas"])
+ARTICLE_INDEX = {}
+for meta in _article_meta["metadatas"]:
+    title = meta["title"]
+    if title not in ARTICLE_INDEX:
+        ARTICLE_INDEX[title] = {
+            "title": title,
+            "url": meta["url"],
+            "lang": meta["lang"],
+        }
+print(f"Article index ready — {len(ARTICLE_INDEX)} titles")
+
+DOC_INDEX = None
+ALIAS_INDEX = {}
+TITLE_ALIASES = {}
 
 print("Init Groq client...")
 groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
@@ -149,6 +189,371 @@ PENJELASAN: <ringkasan 1-2 kalimat dalam Bahasa Indonesia>"""
 # ─────────────────────────────────────────────
 VALID_VERDICTS = {"DIDUKUNG", "DIBANTAH", "INFO_TIDAK_CUKUP"}
 
+def normalize_text(text: str) -> str:
+    text = unicodedata.normalize("NFKD", text)
+    text = "".join(ch for ch in text if not unicodedata.combining(ch))
+    text = text.lower()
+    text = re.sub(r"[^a-z0-9\s]", " ", text)
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def title_base(title: str) -> str:
+    return re.sub(r"\s*\([^)]*\)\s*$", "", title).strip()
+
+
+def tokenize(text: str) -> set[str]:
+    return {
+        token for token in normalize_text(text).split()
+        if len(token) > 2 and token not in STOPWORDS
+    }
+
+
+def add_alias(alias_map: dict[str, set[str]], alias: str, title: str) -> None:
+    alias = normalize_text(alias)
+    if not alias or len(alias) < 3 or alias in STOPWORDS:
+        return
+    alias_map.setdefault(alias, set()).add(title)
+
+
+def clean_alias_phrase(text: str) -> str:
+    text = re.sub(r"\[[^\]]+\]", "", text)
+    text = re.sub(r"\([^)]*\)", "", text)
+    text = text.strip(" \"'“”‘’")
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def extract_summary_aliases(text: str) -> list[str]:
+    aliases = []
+    patterns = [
+        r"(?:lebih dikenal sebagai|dikenal sebagai|dikenal dengan sapaan|dengan sapaan)\s+([^.;\n]{2,80})",
+        r"(?:better known as|known as)\s+([^.;\n]{2,80})",
+    ]
+    for pattern in patterns:
+        for match in re.finditer(pattern, text, flags=re.IGNORECASE):
+            phrase = match.group(1)
+            parts = re.split(r"\s+(?:atau|or|dan|and)\s+|,|/", phrase)
+            aliases.extend(clean_alias_phrase(part) for part in parts)
+    return [alias for alias in aliases if 3 <= len(alias) <= 60]
+
+
+def ensure_search_indexes() -> None:
+    global DOC_INDEX, ALIAS_INDEX, TITLE_ALIASES
+    if DOC_INDEX is not None:
+        return
+
+    result = collection.get(include=["documents", "metadatas"])
+    docs = []
+    alias_candidates = {}
+    token_counts = {}
+
+    for title in ARTICLE_INDEX:
+        for token in tokenize(title_base(title)):
+            token_counts[token] = token_counts.get(token, 0) + 1
+
+    for doc, meta in zip(result["documents"], result["metadatas"]):
+        title = meta["title"]
+        record = {
+            "text": doc,
+            "title": title,
+            "section": meta["section"],
+            "url": meta["url"],
+            "lang": meta["lang"],
+            "tokens": tokenize(f"{title} {meta['section']} {doc}"),
+        }
+        docs.append(record)
+
+        if meta["section"].lower() == "summary":
+            for alias in extract_summary_aliases(doc):
+                add_alias(alias_candidates, alias, title)
+
+    for alias, title in ALIASES.items():
+        if title in ARTICLE_INDEX:
+            add_alias(alias_candidates, alias, title)
+
+    for title in ARTICLE_INDEX:
+        base = title_base(title)
+        base_norm = normalize_text(base)
+        title_norm = normalize_text(title)
+        add_alias(alias_candidates, base_norm, title)
+        add_alias(alias_candidates, title_norm, title)
+
+        tokens = list(tokenize(base))
+        for token in tokens:
+            if token_counts.get(token, 0) == 1 and len(token) >= 5:
+                add_alias(alias_candidates, token, title)
+
+        initials = "".join(token[0] for token in normalize_text(base).split() if token)
+        if 2 <= len(initials) <= 5:
+            add_alias(alias_candidates, initials, title)
+
+    ALIAS_INDEX = alias_candidates
+    TITLE_ALIASES = {}
+    for alias, titles in ALIAS_INDEX.items():
+        for title in titles:
+            TITLE_ALIASES.setdefault(title, set()).add(alias)
+    DOC_INDEX = docs
+    print(f"Search indexes ready — {len(ALIAS_INDEX)} aliases, {len(DOC_INDEX)} docs")
+
+
+def aliases_for_title(title: str) -> set[str]:
+    ensure_search_indexes()
+    aliases = set(TITLE_ALIASES.get(title, set()))
+    aliases.add(normalize_text(title_base(title)))
+    return aliases
+
+
+def resolve_title_candidates(klaim: str, limit: int = 3) -> list[str]:
+    """Find likely article titles mentioned in the claim before vector search."""
+    ensure_search_indexes()
+    norm_claim = normalize_text(klaim)
+    claim_tokens = tokenize(klaim)
+    scored = {}
+
+    for alias, title in ALIASES.items():
+        if re.search(rf"\b{re.escape(normalize_text(alias))}\b", norm_claim) and title in ARTICLE_INDEX:
+            scored[title] = max(scored.get(title, 0), 1000)
+
+    for alias, titles in ALIAS_INDEX.items():
+        if re.search(rf"\b{re.escape(alias)}\b", norm_claim):
+            alias_score = 950 + len(alias)
+            if len(titles) > 1:
+                alias_score -= 120
+            for title in titles:
+                scored[title] = max(scored.get(title, 0), alias_score)
+
+    for title in ARTICLE_INDEX:
+        norm_title = normalize_text(title)
+        norm_base = normalize_text(title_base(title))
+        title_tokens = tokenize(title_base(title))
+        score = 0
+
+        if norm_title and re.search(rf"\b{re.escape(norm_title)}\b", norm_claim):
+            score = 900 + len(norm_title)
+        elif norm_base and re.search(rf"\b{re.escape(norm_base)}\b", norm_claim):
+            score = 850 + len(norm_base)
+        elif title_tokens and title_tokens.issubset(claim_tokens):
+            score = 700 + len(title_tokens) * 20
+
+        if "(" in title and normalize_text(title) not in norm_claim:
+            score -= 50
+        if score > 0:
+            scored[title] = max(scored.get(title, 0), score)
+
+    return [
+        title for title, _ in sorted(scored.items(), key=lambda item: item[1], reverse=True)[:limit]
+    ]
+
+
+def cosine_distance_to_score(distance: float) -> float:
+    return max(0.0, min(1.0, 1 - (distance / 2)))
+
+
+def rerank_score(klaim: str, evidence: dict, candidate_titles: list[str]) -> float:
+    claim_tokens = tokenize(klaim)
+    evidence_tokens = tokenize(f"{evidence['title']} {evidence['section']} {evidence['text']}")
+    overlap = len(claim_tokens & evidence_tokens)
+    lexical_bonus = min(0.12, overlap * 0.025)
+    title_bonus = 0.15 if evidence["title"] in candidate_titles else 0.0
+    summary_bonus = 0.05 if evidence["section"].lower() == "summary" else 0.0
+    birth_bonus = 0.0
+    birth_penalty = 0.0
+
+    if is_birth_claim(klaim) and evidence["title"] in candidate_titles:
+        if subject_birth_match(evidence["text"], evidence["title"]):
+            birth_bonus = 0.35
+            if contains_date(evidence["text"]):
+                birth_bonus += 0.2
+        elif re.search(r"\b(lahir|born|kelahiran)\b", normalize_text(evidence["text"])):
+            birth_bonus = 0.05
+            birth_penalty = 0.12
+        else:
+            birth_penalty = 0.18
+
+    short_penalty = 0.2 if len(evidence["text"]) < 80 else 0.0
+    return evidence["vector_score"] + lexical_bonus + title_bonus + summary_bonus + birth_bonus - birth_penalty - short_penalty
+
+
+def is_birth_claim(klaim: str) -> bool:
+    norm = normalize_text(klaim)
+    return bool(re.search(r"\b(lahir|born|kelahiran|tanggal lahir)\b", norm))
+
+
+def contains_date(text: str) -> bool:
+    norm = normalize_text(text)
+    months = (
+        "januari|februari|maret|april|mei|juni|juli|agustus|september|"
+        "oktober|november|desember|january|february|march|april|may|june|"
+        "july|august|september|october|november|december"
+    )
+    return bool(re.search(rf"\b\d{{1,2}}\s+({months})\s+\d{{4}}\b", norm))
+
+
+def subject_birth_match(text: str, title: str) -> bool:
+    norm_text = normalize_text(text)
+    full_name = normalize_text(title_base(title))
+    aliases = aliases_for_title(title)
+
+    if full_name:
+        patterns = [
+            rf"\b{re.escape(full_name)}\b.{{0,100}}\b(lahir|born)\b",
+            rf"\b(lahir|born)\b.{{0,100}}\b{re.escape(full_name)}\b",
+        ]
+        if any(re.search(pattern, norm_text) for pattern in patterns):
+            return True
+
+    for alias in aliases:
+        patterns = [
+            rf"\b{re.escape(alias)}\s+(lahir|born)\b",
+            rf"\b(lahir|born)\b.{{0,80}}\b{re.escape(alias)}\b",
+        ]
+        if any(re.search(pattern, norm_text) for pattern in patterns):
+            return True
+
+    return False
+
+
+def subject_name_match(text: str, title: str) -> bool:
+    norm_text = normalize_text(text)
+    for name in aliases_for_title(title):
+        if not name:
+            continue
+        if re.search(rf"\b{re.escape(name)}\b", norm_text):
+            return True
+    return False
+
+
+def collect_hits(query_vec: list[list[float]], n_results: int, where: Optional[dict] = None) -> list[dict]:
+    kwargs = {
+        "query_embeddings": query_vec,
+        "n_results": n_results,
+        "include": ["documents", "metadatas", "distances"],
+    }
+    if where:
+        kwargs["where"] = where
+
+    result = collection.query(**kwargs)
+    hits = []
+    for doc, meta, dist in zip(
+        result["documents"][0],
+        result["metadatas"][0],
+        result["distances"][0],
+    ):
+        score = cosine_distance_to_score(dist)
+        hits.append({
+            "text": doc,
+            "title": meta["title"],
+            "section": meta["section"],
+            "url": meta["url"],
+            "lang": meta["lang"],
+            "vector_score": score,
+        })
+    return hits
+
+
+def collect_lexical_hits(klaim: str, candidate_titles: list[str], limit: int = 25) -> list[dict]:
+    ensure_search_indexes()
+    claim_tokens = tokenize(klaim)
+    if not claim_tokens:
+        return []
+
+    scored = []
+    candidate_set = set(candidate_titles)
+    for doc in DOC_INDEX:
+        if candidate_set and doc["title"] not in candidate_set:
+            continue
+        overlap = len(claim_tokens & doc["tokens"])
+        if overlap == 0:
+            continue
+
+        title_bonus = 4 if doc["title"] in candidate_set else 0
+        summary_bonus = 1 if doc["section"].lower() == "summary" else 0
+        score = overlap + title_bonus + summary_bonus
+        scored.append((score, doc))
+
+    scored.sort(key=lambda item: item[0], reverse=True)
+    hits = []
+    for score, doc in scored[:limit]:
+        hits.append({
+            "text": doc["text"],
+            "title": doc["title"],
+            "section": doc["section"],
+            "url": doc["url"],
+            "lang": doc["lang"],
+            "vector_score": min(0.82, 0.55 + score * 0.04),
+        })
+    return hits
+
+
+def retrieve_evidence(klaim: str, query_vec: list[list[float]], top_k: int) -> list[dict]:
+    candidate_titles = resolve_title_candidates(klaim)
+    pool_size = max(RETRIEVAL_POOL, top_k * 10)
+    raw_hits = []
+
+    if candidate_titles:
+        per_title = max(top_k + 5, 10)
+        for title in candidate_titles:
+            raw_hits.extend(collect_hits(query_vec, per_title, where={"title": title}))
+            if is_birth_claim(klaim):
+                raw_hits.extend(collect_subject_birth_hits(title))
+        raw_hits.extend(collect_lexical_hits(klaim, candidate_titles, limit=25))
+    else:
+        raw_hits.extend(collect_hits(query_vec, pool_size))
+        raw_hits.extend(collect_lexical_hits(klaim, [], limit=25))
+
+    seen = set()
+    evidence = []
+    for hit in raw_hits:
+        key = (hit["title"], hit["section"], hit["text"])
+        if key in seen:
+            continue
+        seen.add(key)
+
+        final_score = rerank_score(klaim, hit, candidate_titles)
+        if hit["vector_score"] < MIN_SCORE or final_score < MIN_SCORE:
+            continue
+
+        evidence.append({
+            "text": hit["text"],
+            "title": hit["title"],
+            "section": hit["section"],
+            "url": hit["url"],
+            "lang": hit["lang"],
+            "score": round(min(1.0, final_score), 4),
+            "_rank": final_score,
+        })
+
+    if is_birth_claim(klaim) and candidate_titles:
+        subject_birth_evidence = [
+            item for item in evidence
+            if item["title"] in candidate_titles and subject_birth_match(item["text"], item["title"])
+        ]
+        if subject_birth_evidence:
+            evidence = subject_birth_evidence
+
+    evidence.sort(key=lambda item: item["_rank"], reverse=True)
+    for item in evidence:
+        item.pop("_rank", None)
+    return evidence[:top_k]
+
+
+def collect_subject_birth_hits(title: str) -> list[dict]:
+    result = collection.get(
+        where={"title": title},
+        include=["documents", "metadatas"],
+    )
+    hits = []
+    for doc, meta in zip(result["documents"], result["metadatas"]):
+        if meta["section"].lower() == "summary" or subject_birth_match(doc, title):
+            hits.append({
+                "text": doc,
+                "title": meta["title"],
+                "section": meta["section"],
+                "url": meta["url"],
+                "lang": meta["lang"],
+                "vector_score": 0.78,
+            })
+    return hits[:12]
+
 def parse_response(text: str, strategi: str) -> dict:
     if strategi == "structured":
         try:
@@ -223,30 +628,8 @@ def cek_fakta(req: FactCheckRequest):
         device=device,
     ).tolist()
 
-    result = collection.query(
-        query_embeddings=query_vec,
-        n_results=req.top_k,
-        include=["documents", "metadatas", "distances"],
-    )
+    evidence = retrieve_evidence(req.klaim, query_vec, req.top_k)
     retrieval_ms = (time.perf_counter() - t0) * 1000
-
-    docs      = result["documents"][0]
-    metas     = result["metadatas"][0]
-    distances = result["distances"][0]
-
-    evidence = []
-    for doc, meta, dist in zip(docs, metas, distances):
-        score = 1 - (dist / 2)
-        if score < MIN_SCORE:
-            continue  # skip evidence yang tidak relevan
-        evidence.append({
-            "text"   : doc,
-            "title"  : meta["title"],
-            "section": meta["section"],
-            "url"    : meta["url"],
-            "lang"   : meta["lang"],
-            "score"  : round(score, 4),
-        })
 
     if not evidence:
         return FactCheckResponse(
@@ -309,26 +692,16 @@ def cari(req: SearchRequest):
         normalize_embeddings=True,
         device=device,
     ).tolist()
-    result = collection.query(
-        query_embeddings=query_vec,
-        n_results=req.top_k,
-        include=["documents", "metadatas", "distances"],
-    )
-    hits = []
-    for doc, meta, dist in zip(
-        result["documents"][0],
-        result["metadatas"][0],
-        result["distances"][0],
-    ):
-        score = round(1 - dist / 2, 4)
-        if score < MIN_SCORE:
-            continue
-        hits.append({
-            "teks" : doc,
-            "judul": meta["title"],
-            "skor" : score,
-        })
-    return hits
+    evidence = retrieve_evidence(req.query, query_vec, req.top_k)
+    return [
+        {
+            "teks" : item["text"],
+            "judul": item["title"],
+            "seksi": item["section"],
+            "skor" : item["score"],
+        }
+        for item in evidence
+    ]
 
 
 if __name__ == "__main__":
