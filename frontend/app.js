@@ -6,7 +6,6 @@ const API_BASE_URL = "http://localhost:8001";
 // ==========================================================================
 // DOM ELEMENTS
 // ==========================================================================
-// DOM ELEMENTS
 const apiStatusBadge = document.getElementById("api-status");
 const factCheckForm = document.getElementById("factcheck-form");
 const klaimInput = document.getElementById("klaim");
@@ -16,14 +15,12 @@ const btnSubmitText = btnSubmit.querySelector(".btn-text");
 const btnSubmitIcon = btnSubmit.querySelector(".btn-icon");
 const btnSubmitSpinner = btnSubmit.querySelector(".spinner");
 
-// View States
 const welcomeState = document.getElementById("welcome-state");
 const loadingState = document.getElementById("loading-state");
 const errorState = document.getElementById("error-state");
 const errorMsg = document.getElementById("error-msg");
 const resultState = document.getElementById("result-state");
 
-// Result Elements
 const verdictContainer = document.getElementById("verdict-container");
 const verdictTitle = document.getElementById("verdict-title");
 const verdictIcon = document.getElementById("verdict-icon");
@@ -34,85 +31,92 @@ const reasoningContent = document.getElementById("reasoning-content");
 const evidenceContainer = document.getElementById("evidence-container");
 const retrievalTime = document.getElementById("retrieval-time");
 const llmTime = document.getElementById("llm-time");
+const totalTime = document.getElementById("total-time");
 
-// Dataset Browser Elements
 const tokohCountBadge = document.getElementById("tokoh-count");
 const searchTokohInput = document.getElementById("search-tokoh");
 const tokohList = document.getElementById("tokoh-list");
 
-// State
 let allTokoh = [];
+let healthRetryTimer = null;
+let indexRetryTimer = null;
 
 // ==========================================================================
-// INIT & API HEALTH CHECK
+// INIT
 // ==========================================================================
 document.addEventListener("DOMContentLoaded", () => {
     checkApiHealth();
     loadIndexedFigures();
 
-    // Form submit listener
     factCheckForm.addEventListener("submit", handleFactCheckSubmit);
-
-    // Search tokoh listener
     searchTokohInput.addEventListener("input", filterTokohList);
 
-    // Sample claims click listener
     document.querySelectorAll(".sample-claim").forEach(link => {
-        link.addEventListener("click", (e) => {
-            e.preventDefault();
-            klaimInput.value = e.target.textContent;
+        link.addEventListener("click", (event) => {
+            event.preventDefault();
+            klaimInput.value = event.target.textContent;
             klaimInput.focus();
         });
     });
 });
 
-/**
- * Check if FastAPI server is up and reachable
- */
 async function checkApiHealth() {
     try {
         const response = await fetch(`${API_BASE_URL}/`);
-        if (response.ok) {
-            const data = await response.json();
-            apiStatusBadge.className = "api-status-badge online";
-            apiStatusBadge.querySelector(".status-text").textContent = "API Tersambung";
-        } else {
-            throw new Error("HTTP error");
-        }
+        if (!response.ok) throw new Error("HTTP error");
+
+        const data = await response.json();
+        setApiStatus(true, `API aktif · ${data.chunks || 0} chunks`);
     } catch (error) {
         console.error("Health check failed:", error);
-        apiStatusBadge.className = "api-status-badge offline";
-        apiStatusBadge.querySelector(".status-text").textContent = "API Terputus";
+        setApiStatus(false, "API terputus");
+        scheduleHealthRetry();
     }
 }
 
-// ==========================================================================
-// DATASET BROWSER FUNCTIONS
-// ==========================================================================
-/**
- * Load indexed figures from /artikel endpoint
- */
 async function loadIndexedFigures() {
     try {
         const response = await fetch(`${API_BASE_URL}/artikel`);
         if (!response.ok) throw new Error("Gagal mengambil daftar tokoh");
-        
+
         allTokoh = await response.json();
-        
-        // Sort alphabetically
         allTokoh.sort((a, b) => a.judul.localeCompare(b.judul));
 
         tokohCountBadge.textContent = `${allTokoh.length} tokoh`;
         renderTokohList(allTokoh);
+        if (indexRetryTimer) {
+            clearTimeout(indexRetryTimer);
+            indexRetryTimer = null;
+        }
     } catch (error) {
         console.error("Error loading figures:", error);
-        tokohList.innerHTML = `<li class="loading-item" style="color: var(--danger-color)">✗ Gagal memuat dataset</li>`;
+        tokohCountBadge.textContent = "retry";
+        tokohList.innerHTML = `<li class="loading-item">Mencoba memuat ulang indeks...</li>`;
+        scheduleIndexRetry();
     }
 }
 
-/**
- * Render the filtered/unfiltered list of figures
- */
+function setApiStatus(isOnline, text) {
+    apiStatusBadge.className = `api-status-badge ${isOnline ? "online" : "offline"}`;
+    apiStatusBadge.querySelector(".status-text").textContent = text;
+}
+
+function scheduleHealthRetry() {
+    if (healthRetryTimer) return;
+    healthRetryTimer = setTimeout(() => {
+        healthRetryTimer = null;
+        checkApiHealth();
+    }, 2500);
+}
+
+function scheduleIndexRetry() {
+    if (indexRetryTimer) return;
+    indexRetryTimer = setTimeout(() => {
+        indexRetryTimer = null;
+        loadIndexedFigures();
+    }, 2500);
+}
+
 function renderTokohList(list) {
     if (list.length === 0) {
         tokohList.innerHTML = `<li class="loading-item">Tokoh tidak ditemukan</li>`;
@@ -120,64 +124,48 @@ function renderTokohList(list) {
     }
 
     tokohList.innerHTML = list.map(tokoh => `
-        <li data-title="${tokoh.judul}">
-            <span class="tokoh-name">${tokoh.judul}</span>
-            <span class="tokoh-meta">${tokoh.bahasa}</span>
+        <li data-title="${escapeHtml(tokoh.judul)}">
+            <span class="tokoh-name">${escapeHtml(tokoh.judul)}</span>
+            <span class="tokoh-meta">${escapeHtml(tokoh.bahasa)}</span>
         </li>
     `).join("");
 
-    // Add click listeners to items
     tokohList.querySelectorAll("li").forEach(item => {
         item.addEventListener("click", () => {
             const name = item.getAttribute("data-title");
-            klaimInput.value = `${name} adalah...`;
+            klaimInput.value = `${name} adalah `;
             klaimInput.focus();
-            
-            // Highlight text range
-            const len = klaimInput.value.length;
-            klaimInput.setSelectionRange(len, len);
+            klaimInput.setSelectionRange(klaimInput.value.length, klaimInput.value.length);
         });
     });
 }
 
-/**
- * Filter figures client-side based on search input
- */
 function filterTokohList() {
     const query = searchTokohInput.value.toLowerCase().trim();
     if (!query) {
         renderTokohList(allTokoh);
         return;
     }
-    const filtered = allTokoh.filter(t => t.judul.toLowerCase().includes(query));
-    renderTokohList(filtered);
+
+    renderTokohList(allTokoh.filter(tokoh => tokoh.judul.toLowerCase().includes(query)));
 }
 
-// ==========================================================================
-// FACT CHECKING CORE FLOW
-// ==========================================================================
-/**
- * Handles Form Submission and API Integration
- */
-async function handleFactCheckSubmit(e) {
-    e.preventDefault();
+async function handleFactCheckSubmit(event) {
+    event.preventDefault();
 
     const klaim = klaimInput.value.trim();
     const strategi = strategiSelect.value;
-    const top_k = 5; // Hardcoded default yang optimal untuk RAG fact checker
+    const top_k = 5;
 
     if (!klaim) return;
 
-    // UI State: Loading
     setLoadingState(true);
 
     try {
         const response = await fetch(`${API_BASE_URL}/cek-fakta`, {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ klaim, strategi, top_k })
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ klaim, strategi, top_k }),
         });
 
         if (!response.ok) {
@@ -186,6 +174,8 @@ async function handleFactCheckSubmit(e) {
         }
 
         const data = await response.json();
+        setApiStatus(true, "API aktif");
+        if (allTokoh.length === 0) loadIndexedFigures();
         renderResult(data);
     } catch (error) {
         console.error("Fact-check error:", error);
@@ -195,111 +185,82 @@ async function handleFactCheckSubmit(e) {
     }
 }
 
-/**
- * Switch visibility to show loading state
- */
 function setLoadingState(isLoading) {
-    if (isLoading) {
-        // Disable form elements
-        klaimInput.disabled = true;
-        strategiSelect.disabled = true;
-        btnSubmit.disabled = true;
+    klaimInput.disabled = isLoading;
+    strategiSelect.disabled = isLoading;
+    btnSubmit.disabled = isLoading;
 
-        // Toggle buttons spinner
-        btnSubmitText.textContent = "Sedang Memeriksa Fakta...";
+    if (isLoading) {
+        btnSubmitText.textContent = "Memverifikasi...";
         btnSubmitIcon.classList.add("hidden");
         btnSubmitSpinner.classList.remove("hidden");
 
-        // Swap panels
         welcomeState.classList.add("hidden");
         errorState.classList.add("hidden");
         resultState.classList.add("hidden");
         loadingState.classList.remove("hidden");
     } else {
-        // Enable form elements
-        klaimInput.disabled = false;
-        strategiSelect.disabled = false;
-        btnSubmit.disabled = false;
-
-        // Reset buttons spinner
-        btnSubmitText.textContent = "Cek Kebenaran Klaim";
+        btnSubmitText.textContent = "Jalankan Verifikasi";
         btnSubmitIcon.classList.remove("hidden");
         btnSubmitSpinner.classList.add("hidden");
-
         loadingState.classList.add("hidden");
     }
 }
 
-/**
- * Show error message card
- */
 function showError(message) {
     errorMsg.textContent = message;
     errorState.classList.remove("hidden");
     resultState.classList.add("hidden");
 }
 
-/**
- * Highlight important keywords in the source text for human audit
- */
 function highlightKeywords(text, claim) {
-    if (!claim) return text;
-    
-    // Stop words & small words filter to get core nouns/entities
+    if (!claim) return escapeHtml(text);
+
     const ignoreList = new Set([
-        "adalah", "yang", "dan", "di", "dari", "ke", "pada", "itu", "ini", "dengan", "atau", "sebagai", "untuk",
-        "ia", "dia", "mereka", "kita", "kamu", "saya", "akan", "telah", "sudah", "belum", "sedang", "dalam"
+        "adalah", "yang", "dan", "di", "dari", "ke", "pada", "itu", "ini", "dengan", "atau",
+        "sebagai", "untuk", "ia", "dia", "mereka", "kita", "kamu", "saya", "akan", "telah",
+        "sudah", "belum", "sedang", "dalam",
     ]);
 
-    // Tokenize claim into words, clean them
     const words = claim.toLowerCase()
         .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?"']/g, "")
         .split(/\s+/)
-        .filter(w => w.length > 2 && !ignoreList.has(w));
+        .filter(word => word.length > 2 && !ignoreList.has(word));
 
-    if (words.length === 0) return text;
+    const safeText = escapeHtml(text);
+    if (words.length === 0) return safeText;
 
-    // Create regex matching any of these keywords (case insensitive, full word boundaries where possible)
-    // Escape keywords
-    const escapedWords = words.map(w => w.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'));
+    const escapedWords = words.map(word => word.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&"));
     const regex = new RegExp(`\\b(${escapedWords.join("|")})\\b`, "gi");
 
-    return text.replace(regex, (match) => `<mark class="highlight">${match}</mark>`);
+    return safeText.replace(regex, match => `<mark class="highlight">${match}</mark>`);
 }
 
-/**
- * Render result data into UI templates
- */
 function renderResult(data) {
-    // 1. Theme Verdict Container based on response
-    verdictContainer.className = "glass-card result-header-card";
+    verdictContainer.className = "panel verdict-card";
     const verdict = data.verdict.toUpperCase();
 
     if (verdict === "DIDUKUNG") {
         verdictContainer.classList.add("didukung");
         verdictTitle.textContent = "DIDUKUNG";
-        verdictIcon.innerHTML = `<i class="fa-solid fa-circle-check"></i>`;
+        verdictIcon.innerHTML = `<i class="fa-solid fa-check"></i>`;
     } else if (verdict === "DIBANTAH") {
         verdictContainer.classList.add("dibantah");
         verdictTitle.textContent = "DIBANTAH";
-        verdictIcon.innerHTML = `<i class="fa-solid fa-circle-xmark"></i>`;
+        verdictIcon.innerHTML = `<i class="fa-solid fa-xmark"></i>`;
     } else {
-        verdictContainer.className = "glass-card result-header-card tidak-cukup";
+        verdictContainer.classList.add("tidak-cukup");
         verdictTitle.textContent = "INFORMASI TIDAK CUKUP";
-        verdictIcon.innerHTML = `<i class="fa-solid fa-circle-question"></i>`;
+        verdictIcon.innerHTML = `<i class="fa-solid fa-question"></i>`;
     }
 
-    // 2. Set Confidence Fill
     const confidenceVal = Math.round(data.kepercayaan * 100);
     confidencePercentage.textContent = `${confidenceVal}%`;
     confidenceFill.style.width = `${confidenceVal}%`;
-
-    // 3. Set explanation & reasoning
     verdictSummary.textContent = data.penjelasan || "Tidak ada kesimpulan singkat.";
-    
-    // Formatting Chain of Thought (bolding lines starting with "Langkah" or steps)
+
     if (data.penalaran) {
-        let formattedReasoning = data.penalaran
+        const formattedReasoning = escapeHtml(data.penalaran)
             .replace(/(Langkah\s+\d+)/gi, "<strong>$1</strong>")
             .replace(/(Step\s+\d+)/gi, "<strong>$1</strong>")
             .replace(/(Kesimpulan:)/gi, "<strong>$1</strong>");
@@ -309,40 +270,51 @@ function renderResult(data) {
         document.getElementById("reasoning-card").classList.add("hidden");
     }
 
-    // 4. Render Evidence Cards
     if (data.bukti && data.bukti.length > 0) {
-        evidenceContainer.innerHTML = data.bukti.map(evidence => {
+        evidenceContainer.innerHTML = data.bukti.map((evidence, index) => {
             const highlightedText = highlightKeywords(evidence.teks, data.klaim);
             const scorePercent = Math.round(evidence.skor * 100);
 
             return `
-            <article class="evidence-card">
-                <div class="evidence-header">
-                    <div class="evidence-source">
-                        <span class="source-icon"><i class="fa-brands fa-wikipedia-w"></i></span>
-                        <span class="source-title">${evidence.judul}</span>
-                        <span class="source-section">${evidence.seksi}</span>
+                <article class="evidence-card">
+                    <div class="evidence-header">
+                        <div class="evidence-source">
+                            <span class="source-icon"><i class="fa-brands fa-wikipedia-w"></i></span>
+                            <span class="source-title">${escapeHtml(evidence.judul)}</span>
+                            <span class="source-section">${escapeHtml(evidence.seksi)}</span>
+                        </div>
+                        <span class="evidence-score">${scorePercent}%</span>
                     </div>
-                    <span class="evidence-score">${scorePercent}% Relevansi</span>
-                </div>
-                <p class="evidence-text">"... ${highlightedText} ..."</p>
-                <div class="evidence-footer">
-                    <a href="${evidence.url}" target="_blank" class="evidence-link">
-                        Buka Artikel Wikipedia <i class="fa-solid fa-arrow-up-right-from-square"></i>
-                    </a>
-                    <span class="evidence-lang">${evidence.bahasa}</span>
-                </div>
-            </article>
+                    <p class="evidence-text"><strong>Bukti ${index + 1}</strong> "${highlightedText}"</p>
+                    <div class="evidence-footer">
+                        <a href="${escapeAttribute(evidence.url)}" target="_blank" rel="noreferrer" class="evidence-link">
+                            Buka Wikipedia <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                        </a>
+                        <span class="evidence-lang">${escapeHtml(evidence.bahasa)}</span>
+                    </div>
+                </article>
             `;
         }).join("");
     } else {
-        evidenceContainer.innerHTML = `<div class="glass-card" style="text-align: center; color: var(--text-muted)">Tidak ada bukti relevan yang lolos threshold minimal.</div>`;
+        evidenceContainer.innerHTML = `<div class="panel empty-evidence">Tidak ada bukti relevan yang lolos threshold minimal.</div>`;
     }
 
-    // 5. Performance Indicators
     retrievalTime.textContent = `${data.waktu_retrieval_ms.toFixed(1)} ms`;
     llmTime.textContent = `${data.waktu_llm_ms.toFixed(1)} ms`;
+    totalTime.textContent = `${(data.waktu_retrieval_ms + data.waktu_llm_ms).toFixed(1)} ms`;
 
-    // Swap State to Result view
     resultState.classList.remove("hidden");
+}
+
+function escapeHtml(value) {
+    return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+function escapeAttribute(value) {
+    return escapeHtml(value).replace(/`/g, "&#096;");
 }
