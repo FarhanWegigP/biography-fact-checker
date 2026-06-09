@@ -1,176 +1,284 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BioFactChecker - RAG Verification Console</title>
+    <title>BioFactChecker</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="app-shell">
-        <header class="app-header">
-            <div class="brand-lockup">
-                <div class="brand-mark"><i class="fa-solid fa-fingerprint"></i></div>
-                <div>
-                    <p class="eyebrow">RAG Verification Console</p>
+
+    <!-- ── App Sidebar ──────────────────────────────────── -->
+    <aside class="app-sidebar is-open" id="app-sidebar" aria-label="Panel navigasi">
+        <div class="sidebar-rail" aria-label="Navigasi cepat">
+            <button class="rail-btn rail-logo" id="btn-sidebar-rail-open" aria-label="Buka sidebar" title="Buka sidebar">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                    <polyline points="9 12 11 14 15 10"/>
+                </svg>
+            </button>
+            <button class="rail-btn" id="btn-sidebar-rail-index" aria-label="Buka indeks tokoh" title="Indeks tokoh">
+                <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
+            </button>
+            <button class="rail-btn" id="btn-sidebar-rail-history" aria-label="Buka riwayat" title="Riwayat">
+                <i class="ph ph-clock-counter-clockwise" aria-hidden="true"></i>
+            </button>
+            <button class="rail-btn" id="btn-sidebar-rail-new" aria-label="Klaim baru" title="Klaim baru">
+                <i class="ph ph-note-pencil" aria-hidden="true"></i>
+            </button>
+        </div>
+        <div class="sidebar-head">
+            <div class="sidebar-logo">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                    <polyline points="9 12 11 14 15 10"/>
+                </svg>
+                BioFactChecker
+            </div>
+            <button class="sidebar-close-btn" id="btn-sidebar-close" aria-label="Tutup sidebar">
+                <i class="ph ph-x" aria-hidden="true"></i>
+            </button>
+        </div>
+
+        <div class="sidebar-body">
+
+            <!-- History -->
+            <div class="sidebar-section">
+                <div class="sidebar-section-hdr">
+                    <span>Riwayat</span>
+                    <button class="sidebar-action-btn" id="btn-clear-history" aria-label="Hapus semua riwayat">Hapus semua</button>
+                </div>
+                <ul id="history-list" class="sidebar-hist-list" role="listbox" tabindex="-1">
+                    <li class="sidebar-empty-hint">Belum ada riwayat.</li>
+                </ul>
+            </div>
+
+            <!-- Tokoh Index -->
+            <div class="sidebar-section sidebar-section--grow">
+                <div class="sidebar-section-hdr">
+                    <span>Indeks Tokoh</span>
+                    <span id="tokoh-count" class="count-pill">0</span>
+                </div>
+                <div class="sidebar-search-wrap">
+                    <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
+                    <input id="search-tokoh" type="text" placeholder="Cari tokoh..." aria-label="Cari tokoh">
+                </div>
+                <ul id="tokoh-list" class="tokoh-list sidebar-tokoh-list" role="listbox">
+                    <li class="tokoh-loading">Memuat indeks...</li>
+                </ul>
+            </div>
+
+        </div>
+    </aside>
+
+    <!-- Mobile overlay -->
+    <div class="sidebar-overlay" id="sidebar-overlay" aria-hidden="true"></div>
+
+    <!-- ── Main Wrap ─────────────────────────────────────── -->
+    <div class="main-wrap" id="main-wrap">
+
+        <!-- ── Nav ──────────────────────────────────── -->
+        <nav class="top-nav">
+            <div class="nav-inner">
+                <div class="nav-left">
+                    <button class="icon-btn" id="btn-sidebar-toggle" aria-label="Tutup sidebar" aria-expanded="true">
+                        <i class="ph ph-sidebar-simple" aria-hidden="true"></i>
+                    </button>
+                    <button class="nav-brand" id="btn-home" aria-label="Ke halaman utama">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <polyline points="14 2 14 8 20 8"/>
+                            <polyline points="9 12 11 14 15 10"/>
+                        </svg>
+                        BioFactChecker
+                    </button>
+                </div>
+                <div class="nav-actions">
+                    <div class="status-pill" id="api-status">
+                        <span class="status-dot"></span>
+                        <span class="status-text">Memeriksa...</span>
+                    </div>
+                    <button class="icon-btn" id="theme-toggle" aria-label="Toggle tema">
+                        <i class="ph ph-moon" id="theme-icon"></i>
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- ── Welcome ──────────────────────────────── -->
+        <div id="welcome-state" class="welcome-page">
+            <div class="welcome-inner">
+
+                <div class="welcome-hero">
+                    <div class="welcome-eyebrow" aria-hidden="true">
+                        <span class="eyebrow-dot"></span>
+                        RAG · Wikipedia
+                    </div>
                     <h1>BioFactChecker</h1>
+                    <p class="welcome-tagline">Verifikasi klaim biografi dengan AI berbasis RAG</p>
                 </div>
-            </div>
-            <div class="api-status-badge" id="api-status">
-                <span class="status-dot"></span>
-                <span class="status-text">Memeriksa API...</span>
-            </div>
-        </header>
 
-        <main class="workspace-grid">
-            <aside class="left-rail">
-                <section class="panel claim-panel">
-                    <div class="panel-header">
-                        <div>
-                            <p class="panel-kicker">Input</p>
-                            <h2>Verifikasi Klaim</h2>
+                <form id="factcheck-form" class="search-form" autocomplete="off">
+                    <div class="search-box-wrap">
+                        <textarea
+                            id="klaim"
+                            class="search-textarea"
+                            placeholder="Masukkan klaim biografi yang ingin dicek..."
+                            rows="3"
+                            required
+                        ></textarea>
+                        <div class="search-form-footer">
+                            <div class="mode-control">
+                                <select id="strategi" class="mode-select" aria-label="Mode penalaran">
+                                    <option value="cot" selected>Chain-of-Thought</option>
+                                    <option value="structured">Structured JSON</option>
+                                    <option value="zero_shot">Zero-Shot</option>
+                                </select>
+                            </div>
+                            <div class="form-actions">
+                                <button type="button" id="btn-mic" class="mic-btn" aria-label="Input via mikrofon" title="Bicara untuk input klaim">
+                                    <i class="ph ph-microphone" id="mic-icon" aria-hidden="true"></i>
+                                </button>
+                                <button type="submit" id="btn-submit" class="submit-btn">
+                                    <span class="btn-text">Cek Fakta</span>
+                                    <i class="ph ph-arrow-right btn-icon" aria-hidden="true"></i>
+                                    <i class="ph ph-circle-notch btn-spinner hidden" aria-hidden="true"></i>
+                                </button>
+                            </div>
                         </div>
-                        <i class="fa-solid fa-magnifying-glass-chart"></i>
                     </div>
+                </form>
 
-                    <form id="factcheck-form">
-                        <div class="field-group">
-                            <label for="klaim">Klaim biografi</label>
-                            <textarea id="klaim" placeholder="Contoh: Jokowi lahir 17 Agustus 1945." required></textarea>
-                        </div>
+                <div class="sample-section">
+                    <p class="sample-label">Contoh klaim</p>
+                    <div class="sample-chips-row">
+                        <a href="#" class="sample-claim">Jokowi lahir 17 Agustus 1945.</a>
+                        <a href="#" class="sample-claim">Barack Obama lahir di Hawaii.</a>
+                        <a href="#" class="sample-claim">Albert Einstein menerima Nobel Fisika pada 1921.</a>
+                    </div>
+                </div>
 
-                        <div class="field-group">
-                            <label for="strategi">Mode penalaran</label>
-                            <select id="strategi">
-                                <option value="cot" selected>Chain-of-Thought</option>
-                                <option value="structured">Structured JSON</option>
-                                <option value="zero_shot">Zero-Shot</option>
-                            </select>
-                        </div>
+            </div>
+        </div>
 
-                        <button type="submit" id="btn-submit" class="primary-action">
-                            <span class="btn-text">Jalankan Verifikasi</span>
-                            <span class="btn-icon"><i class="fa-solid fa-arrow-right"></i></span>
-                            <span class="spinner hidden"><i class="fa-solid fa-circle-notch fa-spin"></i></span>
+        <!-- ── Result ────────────────────────────────── -->
+        <div id="result-container" class="result-page hidden">
+
+            <!-- Query bar -->
+            <div class="query-bar">
+                <div class="query-bar-inner">
+                    <h2 id="query-display" class="query-display"></h2>
+                    <div class="query-bar-actions">
+                        <button id="btn-share" class="icon-btn" aria-label="Salin tautan hasil">
+                            <i class="ph ph-link" id="share-icon" aria-hidden="true"></i>
                         </button>
-                    </form>
-                </section>
-
-                <section class="panel dataset-browser">
-                    <div class="panel-header compact">
-                        <div>
-                            <p class="panel-kicker">Corpus</p>
-                            <h2>Indeks Tokoh</h2>
-                        </div>
-                        <span class="count-badge" id="tokoh-count">0 tokoh</span>
-                    </div>
-
-                    <div class="search-box">
-                        <i class="fa-solid fa-search search-icon"></i>
-                        <input type="text" id="search-tokoh" placeholder="Cari tokoh...">
-                    </div>
-
-                    <div class="tokoh-list-container">
-                        <ul id="tokoh-list" class="tokoh-list">
-                            <li class="loading-item">Memuat indeks...</li>
-                        </ul>
-                    </div>
-                </section>
-            </aside>
-
-            <section class="analysis-stage">
-                <div id="welcome-state" class="empty-state panel">
-                    <div class="empty-state-grid">
-                        <div>
-                            <p class="panel-kicker">Ready</p>
-                            <h2>Masukkan klaim untuk mulai audit bukti.</h2>
-                        </div>
-                        <div class="sample-stack">
-                            <a href="#" class="sample-claim">Jokowi lahir 17 Agustus 1945.</a>
-                            <a href="#" class="sample-claim">Barack Obama lahir di Hawaii.</a>
-                            <a href="#" class="sample-claim">Albert Einstein menerima Nobel Fisika pada 1921.</a>
-                        </div>
+                        <button id="btn-new-search" class="btn-new-search">
+                            <i class="ph ph-plus" aria-hidden="true"></i>
+                            Klaim baru
+                        </button>
                     </div>
                 </div>
+            </div>
 
-                <div id="loading-state" class="loading-panel panel hidden">
-                    <div class="loading-row">
-                        <span class="loader-dot"></span>
-                        <span>Menjalankan retrieval dan inferensi...</span>
+            <!-- Layout -->
+            <div class="result-layout">
+
+                <!-- Main -->
+                <main class="result-main">
+
+                    <!-- Loading -->
+                    <div id="loading-state" class="loading-plex hidden" aria-live="polite">
+                        <div class="load-header">
+                            <span class="loader-pulse" aria-hidden="true"></span>
+                            <span>Menjalankan retrieval dan inferensi...</span>
+                        </div>
+                        <div class="skeleton-strip">
+                            <div class="skeleton-source"></div>
+                            <div class="skeleton-source"></div>
+                            <div class="skeleton-source"></div>
+                            <div class="skeleton-source"></div>
+                        </div>
+                        <div class="skeleton-block"></div>
+                        <div class="skeleton-group">
+                            <div class="skeleton-line w-3-4"></div>
+                            <div class="skeleton-line w-1-2"></div>
+                            <div class="skeleton-line w-2-3"></div>
+                        </div>
                     </div>
-                    <div class="skeleton-line long"></div>
-                    <div class="skeleton-card-grid">
-                        <div class="skeleton-box"></div>
-                        <div class="skeleton-box"></div>
+
+                    <!-- Error -->
+                    <div id="error-state" class="error-plex hidden" role="alert">
+                        <i class="ph ph-warning-circle" aria-hidden="true"></i>
+                        <div class="error-body">
+                            <strong>Request gagal</strong>
+                            <p id="error-msg">Tidak dapat terhubung ke server API.</p>
+                        </div>
                     </div>
-                </div>
 
-                <div id="error-state" class="error-panel panel hidden">
-                    <i class="fa-solid fa-triangle-exclamation"></i>
-                    <div>
-                        <h2>Request gagal</h2>
-                        <p id="error-msg">Tidak dapat terhubung ke server API.</p>
+                    <!-- Answer -->
+                    <div id="result-state" class="answer-zone hidden">
+
+                        <div id="evidence-container" class="sources-strip"></div>
+
+                        <div id="verdict-container" class="verdict-panel">
+                            <div class="verdict-row">
+                                <span id="verdict-icon" class="verdict-icon-wrap" aria-hidden="true"></span>
+                                <h2 id="verdict-title" class="verdict-title"></h2>
+                                <span id="confidence-percentage" class="confidence-pct"></span>
+                            </div>
+                            <div class="conf-bar-bg">
+                                <div id="confidence-fill" class="conf-bar-fill"></div>
+                            </div>
+                            <p id="verdict-summary" class="verdict-summary"></p>
+                        </div>
+
+                        <details id="bukti-details" class="expand-section">
+                            <summary class="expand-summary">
+                                <span>Bukti lengkap</span>
+                                <i class="ph ph-caret-down expand-caret" aria-hidden="true"></i>
+                            </summary>
+                            <div id="full-evidence-container" class="full-evidence"></div>
+                        </details>
+
+                        <details id="reasoning-card" class="expand-section hidden">
+                            <summary class="expand-summary">
+                                <span>Penalaran AI</span>
+                                <i class="ph ph-caret-down expand-caret" aria-hidden="true"></i>
+                            </summary>
+                            <div id="reasoning-content" class="reasoning-body"></div>
+                        </details>
+
+                        <footer class="perf-row">
+                            <span class="perf-chip">Retrieval <strong id="retrieval-time">-</strong></span>
+                            <span class="perf-chip">LLM <strong id="llm-time">-</strong></span>
+                            <span class="perf-chip">Total <strong id="total-time">-</strong></span>
+                        </footer>
+
                     </div>
-                </div>
+                </main>
 
-                <div id="result-state" class="result-stack hidden">
-                    <section class="panel verdict-card" id="verdict-container">
-                        <div class="verdict-topline">
-                            <div class="verdict-status-icon" id="verdict-icon"></div>
-                            <div>
-                                <p class="panel-kicker">Verdict</p>
-                                <h2 id="verdict-title">DIDUKUNG</h2>
-                            </div>
-                        </div>
+                <!-- Result sidebar — mode selector only -->
+                <aside class="result-sidebar">
+                    <div class="sidebar-widget">
+                        <p class="widget-label">Mode analisis</p>
+                        <select id="strategi-sidebar" class="widget-select" aria-label="Mode penalaran">
+                            <option value="cot" selected>Chain-of-Thought</option>
+                            <option value="structured">Structured JSON</option>
+                            <option value="zero_shot">Zero-Shot</option>
+                        </select>
+                    </div>
+                </aside>
 
-                        <p class="verdict-summary" id="verdict-summary"></p>
+            </div>
+        </div>
 
-                        <div class="confidence-block">
-                            <div class="confidence-label">
-                                <span>Kepercayaan</span>
-                                <strong id="confidence-percentage">0%</strong>
-                            </div>
-                            <div class="confidence-bar-bg">
-                                <div class="confidence-bar-fill" id="confidence-fill"></div>
-                            </div>
-                        </div>
-                    </section>
-
-                    <section class="evidence-section">
-                        <div class="section-heading">
-                            <div>
-                                <p class="panel-kicker">RAG Context</p>
-                                <h2>Bukti Terpilih</h2>
-                            </div>
-                            <i class="fa-solid fa-book-open-reader"></i>
-                        </div>
-                        <div class="evidence-grid" id="evidence-container"></div>
-                    </section>
-
-                    <section class="panel reasoning-panel" id="reasoning-card">
-                        <div class="section-heading compact">
-                            <div>
-                                <p class="panel-kicker">AI Reasoning</p>
-                                <h2>Alur Penalaran</h2>
-                            </div>
-                            <i class="fa-solid fa-brain"></i>
-                        </div>
-                        <div class="reasoning-content" id="reasoning-content"></div>
-                    </section>
-
-                    <footer class="perf-metadata">
-                        <span><i class="fa-solid fa-diagram-project"></i> Retrieval <strong id="retrieval-time">0.0 ms</strong></span>
-                        <span><i class="fa-solid fa-microchip"></i> Groq <strong id="llm-time">0.0 ms</strong></span>
-                        <span><i class="fa-solid fa-stopwatch"></i> Total <strong id="total-time">0.0 ms</strong></span>
-                    </footer>
-                </div>
-            </section>
-        </main>
-    </div>
+    </div><!-- /.main-wrap -->
 
     <script src="app.js"></script>
 </body>
