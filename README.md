@@ -1,4 +1,4 @@
-# 🔍 Biography Fact Checker
+# Biography Fact Checker
 
 Sistem pengecekan fakta berbasis RAG (Retrieval-Augmented Generation) untuk informasi biografi tokoh dari Wikipedia.
 
@@ -6,71 +6,78 @@ Dibangun untuk memenuhi Tugas Besar Pemrograman NLP — mencakup LLM, RAG, Promp
 
 ---
 
-## 🏗️ Arsitektur Sistem
+## Arsitektur Sistem
 
 ```
-Input Klaim (Bahasa Indonesia)
+Input (Klaim / Pertanyaan / Gambar / URL)
         ↓
 [Embedding] → paraphrase-multilingual-MiniLM-L12-v2
         ↓
-[Retrieval] → ChromaDB (cosine similarity)
+[Hybrid Retrieval] → ChromaDB (cosine similarity + entity matching)
         ↓
 [Top-K Chunks] ← Wikipedia Biografi (EN + ID)
         ↓
-[LLM Fact-Check] → Groq Llama-3.3-70b (+ Prompt Engineering)
+[LLM Processing] → Groq Llama-3.3-70b / Llama-4 Scout (vision)
         ↓
-Output: DIDUKUNG / DIBANTAH / INFO_TIDAK_CUKUP + Penjelasan
+Output: Verdict + Penjelasan + Source Cards
 ```
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 | Komponen | Teknologi |
 |---|---|
 | API Framework | FastAPI |
-| LLM | Groq Llama-3.3-70b-versatile (gratis) |
+| LLM (text) | Groq `llama-3.3-70b-versatile` |
+| LLM (vision) | Groq `meta-llama/llama-4-scout-17b-16e-instruct` |
 | Embedding Model | `paraphrase-multilingual-MiniLM-L12-v2` |
 | Vector Database | ChromaDB (local persistence) |
 | Data Source | Wikipedia API (EN + ID) |
+| Web Scraping | Trafilatura + Playwright |
 | GPU Acceleration | PyTorch CUDA (opsional) |
 
 ---
 
-## 📁 Struktur Folder
+## Struktur Folder
 
 ```
-RAG/
-├── scraper.py          # Scrape artikel biografi dari Wikipedia by kategori
-├── clean_data_v2.py    # Filter & cleaning data hasil scraping
-├── chunker.py          # Potong artikel jadi chunks ~600 karakter
-├── embed.py            # Embed chunks + simpan ke ChromaDB (GPU support)
-├── api.py              # FastAPI — endpoint utama fact-checking
-├── check_data.py       # Cek statistik dataset
-├── check_tokoh.py      # Cek tokoh mana yang ada di dataset
-├── .env.example        # Template environment variables
-├── .gitignore
-├── README.md
-└── data/               # (tidak di-push ke GitHub)
-    ├── raw_articles.json     # Hasil scraping mentah
-    ├── clean_articles.json   # Setelah cleaning
-    ├── chunks.json           # Setelah chunking
-    └── chroma/               # ChromaDB vector store
+rag/
+├── api.py                  # FastAPI — semua endpoint
+├── requirements.txt
+├── .env                    # API keys (tidak di-push)
+├── frontend/
+│   ├── index.html
+│   ├── app.js
+│   └── style.css
+├── pipeline/
+│   ├── scraper.py          # Scrape artikel biografi dari Wikipedia
+│   ├── clean_data_v2.py    # Filter & cleaning hasil scraping
+│   ├── chunker.py          # Potong artikel jadi chunks
+│   └── embed.py            # Embed chunks → ChromaDB
+├── scripts/
+│   ├── check_data.py       # Statistik dataset
+│   └── check_tokoh.py      # Cek tokoh di dataset
+└── data/                   # Tidak di-push ke GitHub
+    ├── raw_articles.json
+    ├── clean_articles.json
+    ├── chunks.json
+    └── chroma/             # ChromaDB vector store
 ```
 
 ---
 
-## ⚙️ Setup & Instalasi
+## Setup & Instalasi
 
 ### Prasyarat
-- Python 3.11 (bukan 3.14 — PyTorch belum support)
-- GPU NVIDIA (opsional, tapi sangat disarankan)
+- Python 3.11
+- GPU NVIDIA (opsional)
 
 ### 1. Clone repo
 
 ```bash
-git clone https://github.com/USERNAME/REPO_NAME.git
-cd REPO_NAME
+git clone <repo-url>
+cd rag
 ```
 
 ### 2. Buat virtual environment
@@ -84,7 +91,7 @@ source venv311/bin/activate   # Mac/Linux
 ### 3. Install dependencies
 
 ```bash
-pip install wikipedia-api sentence-transformers chromadb groq fastapi uvicorn python-dotenv tqdm
+pip install -r requirements.txt
 ```
 
 Install PyTorch dengan CUDA (GPU NVIDIA):
@@ -99,35 +106,35 @@ pip install torch
 
 ### 4. Setup environment variables
 
-```bash
-cp .env.example .env
-# Isi GROQ_API_KEY di file .env
+Buat file `.env` di root project:
+```
+GROQ_API_KEY=your_groq_api_key_here
 ```
 
 Dapatkan Groq API key gratis di: https://console.groq.com/keys
 
 ---
 
-## 🚀 Menjalankan Sistem
+## Menjalankan Sistem
 
 ### Step 1 — Scrape data Wikipedia
 ```bash
-python scraper.py --max 5000 --max_per_cat 500
+python pipeline/scraper.py --max 5000 --max_per_cat 500
 ```
 
 ### Step 2 — Cleaning data
 ```bash
-python clean_data_v2.py
+python pipeline/clean_data_v2.py
 ```
 
 ### Step 3 — Chunking
 ```bash
-python chunker.py
+python pipeline/chunker.py
 ```
 
 ### Step 4 — Embedding ke ChromaDB
 ```bash
-python embed.py
+python pipeline/embed.py
 ```
 
 ### Step 5 — Jalankan API
@@ -135,50 +142,71 @@ python embed.py
 uvicorn api:app --reload --port 8000
 ```
 
+Buka frontend di browser: `frontend/index.html`  
 API docs: http://localhost:8000/docs
 
 ---
 
-## 🔌 API Endpoints
+## API Endpoints
 
 | Method | Endpoint | Deskripsi |
 |---|---|---|
 | GET | `/` | Health check |
-| POST | `/cek-fakta` | **Endpoint utama fact-checking** |
+| POST | `/cek-fakta` | Fact-checking klaim teks |
+| POST | `/qa` | Tanya-jawab bebas berbasis RAG |
+| POST | `/qa-image` | Fact-check dari gambar/screenshot |
+| POST | `/scan-url` | Scan & fact-check artikel dari URL |
 | POST | `/cari` | Retrieval saja (tanpa LLM) |
 | GET | `/artikel` | List semua artikel yang ter-index |
 
-### Contoh Request
+### Contoh Request — Cek Fakta
 
 ```bash
 curl -X POST http://localhost:8000/cek-fakta \
   -H "Content-Type: application/json" \
-  -d '{
-    "klaim": "Soekarno adalah presiden pertama Indonesia",
-    "strategi": "cot"
-  }'
+  -d '{"klaim": "Soekarno adalah presiden pertama Indonesia", "strategi": "cot"}'
 ```
 
-### Strategi Prompt
+### Contoh Request — Tanya Jawab
+
+```bash
+curl -X POST http://localhost:8000/qa \
+  -H "Content-Type: application/json" \
+  -d '{"pertanyaan": "Siapa pendiri Budi Utomo?"}'
+```
+
+### Strategi Prompt (untuk `/cek-fakta`)
 
 | Strategi | Deskripsi |
 |---|---|
 | `zero_shot` | Langsung jawab tanpa reasoning |
-| `cot` | Chain-of-Thought step-by-step (recommended) |
+| `cot` | Chain-of-Thought step-by-step (default) |
 | `structured` | Output JSON terstruktur |
 
 ---
 
-## 📊 Pipeline Detail
+## Fitur Frontend
+
+- Mode **Cek Fakta** dan **Tanya Jawab** (toggle)
+- Input teks, upload gambar, atau paste URL artikel
+- Source cards dengan snippet Wikipedia
+- History sidebar dengan label per mode (CEK / QA / SCAN)
+- Voice input
+- URL share untuk berbagi hasil
+- Dark mode
+
+---
+
+## Pipeline Detail
 
 ### Scraping
 - Crawl dari 40+ kategori Wikipedia (EN + ID)
-- Auto-resume kalau koneksi putus (`--resume`)
+- Auto-resume jika koneksi putus (`--resume`)
 - Checkpoint setiap 50 artikel
 
 ### Cleaning
-- Hapus duplikat & sections kosong
-- Filter ketat biografi: deteksi pola tanggal lahir & profesi
+- Hapus duplikat & section kosong
+- Filter biografi: deteksi pola tanggal lahir & profesi
 
 ### Chunking
 - Target: 600 karakter per chunk, overlap 80 karakter
@@ -189,14 +217,16 @@ curl -X POST http://localhost:8000/cek-fakta \
 - GPU accelerated (CUDA)
 - Disimpan di ChromaDB dengan cosine similarity
 
+### Retrieval
+- Hybrid: semantic similarity + entity matching
+- Top-K chunks dengan threshold minimum similarity
+
 ---
 
-## ⚠️ Catatan Etika & Bias
+## Etika & Bias
 
 - Dataset lebih berat ke tokoh Indonesia (ID: ~70%, EN: ~30%)
 - Wikipedia memiliki bias representasi gender dan geografi
-- LLM bisa menghasilkan halusinasi meski dengan RAG
+- LLM dapat menghasilkan halusinasi meski dengan RAG
 - Sistem tidak boleh dijadikan satu-satunya sumber kebenaran
 - Data Wikipedia bersifat publik, bebas digunakan untuk riset
-
----
