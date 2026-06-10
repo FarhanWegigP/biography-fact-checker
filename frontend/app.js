@@ -8,10 +8,50 @@ const SIDEBAR_KEY   = "bfc-sidebar";
 const SIDEBAR_STATE_VERSION_KEY = "bfc-sidebar-state-version";
 const SIDEBAR_STATE_VERSION = "rail-v1";
 
+const SAMPLES = {
+    cek: [
+        "Jokowi lahir di Solo pada 21 Juni 1961.",
+        "Barack Obama lahir di Hawaii.",
+        "Albert Einstein menerima Nobel Fisika pada 1921.",
+    ],
+    qa: [
+        "Siapa wakil presiden Indonesia pertama?",
+        "Apa yang dilakukan Prabowo sebelum jadi presiden?",
+        "Kapan Indonesia merdeka dan siapa yang memproklamasikannya?",
+    ],
+};
+
 // ==========================================================================
-// DOM ELEMENTS
+// STATE
+// ==========================================================================
+let currentMode     = "cek";   // "cek" | "qa"
+let currentInputType = "text"; // "text" | "image" | "url"
+let selectedFile    = null;
+
+// ==========================================================================
+// DOM REFS — Common
 // ==========================================================================
 const apiStatusBadge   = document.getElementById("api-status");
+const welcomeState     = document.getElementById("welcome-state");
+const resultContainer  = document.getElementById("result-container");
+const queryDisplay     = document.getElementById("query-display");
+const resultModeBadge  = document.getElementById("result-mode-badge");
+const btnNewSearch     = document.getElementById("btn-new-search");
+const btnHome          = document.getElementById("btn-home");
+const themeToggle      = document.getElementById("theme-toggle");
+const themeIcon        = document.getElementById("theme-icon");
+const loadingState     = document.getElementById("loading-state");
+const loadingLabel     = document.getElementById("loading-label");
+const errorState       = document.getElementById("error-state");
+const errorMsg         = document.getElementById("error-msg");
+const sampleLabel      = document.getElementById("sample-label");
+const sampleChips      = document.getElementById("sample-chips");
+
+// DOM — Mode toggle
+const tabCek = document.getElementById("tab-cek");
+const tabQA  = document.getElementById("tab-qa");
+
+// DOM — Fact-check form
 const factCheckForm    = document.getElementById("factcheck-form");
 const klaimInput       = document.getElementById("klaim");
 const strategiSelect   = document.getElementById("strategi");
@@ -20,20 +60,43 @@ const btnSubmit        = document.getElementById("btn-submit");
 const btnSubmitText    = btnSubmit.querySelector(".btn-text");
 const btnSubmitIcon    = btnSubmit.querySelector(".btn-icon");
 const btnSubmitSpinner = btnSubmit.querySelector(".btn-spinner");
+const btnMic           = document.getElementById("btn-mic");
+const micIcon          = document.getElementById("mic-icon");
 
-const welcomeState    = document.getElementById("welcome-state");
-const resultContainer = document.getElementById("result-container");
-const queryDisplay    = document.getElementById("query-display");
-const btnNewSearch    = document.getElementById("btn-new-search");
-const btnHome         = document.getElementById("btn-home");
-const themeToggle     = document.getElementById("theme-toggle");
-const themeIcon       = document.getElementById("theme-icon");
+// DOM — QA form
+const qaForm        = document.getElementById("qa-form");
+const strategiQA    = document.getElementById("strategi-qa");
+const btnQASubmit   = document.getElementById("btn-qa-submit");
+const qaSubmitText  = document.getElementById("qa-btn-text");
+const qaSubmitIcon  = document.getElementById("qa-btn-icon");
+const qaSubmitSpinner = document.getElementById("qa-btn-spinner");
+const btnMicQA      = document.getElementById("btn-mic-qa");
+const micQAIcon     = document.getElementById("mic-qa-icon");
 
-const loadingState    = document.getElementById("loading-state");
-const errorState      = document.getElementById("error-state");
-const errorMsg        = document.getElementById("error-msg");
-const resultState     = document.getElementById("result-state");
+// DOM — Input type tabs
+const itabText  = document.getElementById("itab-text");
+const itabImage = document.getElementById("itab-image");
+const itabUrl   = document.getElementById("itab-url");
+const paneText  = document.getElementById("pane-text");
+const paneImage = document.getElementById("pane-image");
+const paneUrl   = document.getElementById("pane-url");
 
+// DOM — QA text input
+const qaQuestion = document.getElementById("qa-question");
+
+// DOM — Image upload
+const uploadArea     = document.getElementById("upload-area");
+const imageFileInput = document.getElementById("image-file-input");
+const imagePreview   = document.getElementById("image-preview");
+const previewImg     = document.getElementById("preview-img");
+const previewFilename = document.getElementById("preview-filename");
+const btnRemoveImage = document.getElementById("btn-remove-image");
+
+// DOM — URL input
+const urlInput = document.getElementById("url-input");
+
+// DOM — Fact-check result
+const resultState           = document.getElementById("result-state");
 const verdictContainer      = document.getElementById("verdict-container");
 const verdictTitle          = document.getElementById("verdict-title");
 const verdictIcon           = document.getElementById("verdict-icon");
@@ -48,28 +111,40 @@ const retrievalTime         = document.getElementById("retrieval-time");
 const llmTime               = document.getElementById("llm-time");
 const totalTime             = document.getElementById("total-time");
 
-const tokohCountBadge  = document.getElementById("tokoh-count");
-const searchTokohInput = document.getElementById("search-tokoh");
-const tokohList        = document.getElementById("tokoh-list");
+// DOM — QA result
+const qaResultState    = document.getElementById("qa-result-state");
+const qaEvidenceContainer = document.getElementById("qa-evidence-container");
+const qaAnswerText     = document.getElementById("qa-answer-text");
+const qaRetrievalTime  = document.getElementById("qa-retrieval-time");
+const qaLlmTime        = document.getElementById("qa-llm-time");
+const qaTotalTime      = document.getElementById("qa-total-time");
 
-// Sidebar
-const appSidebar       = document.getElementById("app-sidebar");
-const sidebarOverlay   = document.getElementById("sidebar-overlay");
-const mainWrap         = document.getElementById("main-wrap");
-const btnSidebarToggle = document.getElementById("btn-sidebar-toggle");
-const btnSidebarClose  = document.getElementById("btn-sidebar-close");
+// DOM — Scan result
+const scanResultState  = document.getElementById("scan-result-state");
+const scanArticleCard  = document.getElementById("scan-article-card");
+const scanClaimsList   = document.getElementById("scan-claims-list");
+const scanTotalTime    = document.getElementById("scan-total-time");
+const scanClaimsCount  = document.getElementById("scan-claims-count");
+
+// DOM — Sidebar
+const appSidebar            = document.getElementById("app-sidebar");
+const sidebarOverlay        = document.getElementById("sidebar-overlay");
+const mainWrap              = document.getElementById("main-wrap");
+const btnSidebarToggle      = document.getElementById("btn-sidebar-toggle");
+const btnSidebarClose       = document.getElementById("btn-sidebar-close");
 const btnSidebarRailOpen    = document.getElementById("btn-sidebar-rail-open");
 const btnSidebarRailIndex   = document.getElementById("btn-sidebar-rail-index");
 const btnSidebarRailHistory = document.getElementById("btn-sidebar-rail-history");
 const btnSidebarRailNew     = document.getElementById("btn-sidebar-rail-new");
-const historyList      = document.getElementById("history-list");
-const btnClearHistory  = document.getElementById("btn-clear-history");
+const historyList           = document.getElementById("history-list");
+const btnClearHistory       = document.getElementById("btn-clear-history");
+const tokohCountBadge       = document.getElementById("tokoh-count");
+const searchTokohInput      = document.getElementById("search-tokoh");
+const tokohList             = document.getElementById("tokoh-list");
 
-// Share + mic
+// DOM — Share
 const btnShare  = document.getElementById("btn-share");
 const shareIcon = document.getElementById("share-icon");
-const btnMic    = document.getElementById("btn-mic");
-const micIcon   = document.getElementById("mic-icon");
 
 let allTokoh        = [];
 let healthRetryTimer = null;
@@ -84,53 +159,181 @@ document.addEventListener("DOMContentLoaded", () => {
     initVoiceInput();
     checkApiHealth();
     loadIndexedFigures();
+    renderSampleChips();
 
+    // Fact-check form
     factCheckForm.addEventListener("submit", handleFactCheckSubmit);
-    searchTokohInput.addEventListener("input", filterTokohList);
+
+    // QA form
+    qaForm.addEventListener("submit", handleQASubmit);
+
+    // Mode toggle
+    tabCek.addEventListener("click", () => switchMode("cek"));
+    tabQA.addEventListener("click",  () => switchMode("qa"));
+
+    // Input type tabs
+    itabText.addEventListener("click",  () => switchInputType("text"));
+    itabImage.addEventListener("click", () => switchInputType("image"));
+    itabUrl.addEventListener("click",   () => switchInputType("url"));
+
+    // Image upload
+    uploadArea.addEventListener("click", () => imageFileInput.click());
+    uploadArea.addEventListener("dragover",  e => { e.preventDefault(); uploadArea.classList.add("drag-over"); });
+    uploadArea.addEventListener("dragleave", () => uploadArea.classList.remove("drag-over"));
+    uploadArea.addEventListener("drop", e => {
+        e.preventDefault();
+        uploadArea.classList.remove("drag-over");
+        const file = e.dataTransfer.files[0];
+        if (file) setImageFile(file);
+    });
+    imageFileInput.addEventListener("change", () => {
+        if (imageFileInput.files[0]) setImageFile(imageFileInput.files[0]);
+    });
+    btnRemoveImage.addEventListener("click", clearImageFile);
+
+    // Sync strategy selectors
+    strategiSelect.addEventListener("change", () => {
+        strategiSidebar.value = strategiSelect.value;
+        strategiQA.value = strategiSelect.value;
+    });
+    strategiSidebar.addEventListener("change", () => {
+        strategiSelect.value  = strategiSidebar.value;
+        strategiQA.value      = strategiSidebar.value;
+    });
+    strategiQA.addEventListener("change", () => {
+        strategiSelect.value  = strategiQA.value;
+        strategiSidebar.value = strategiQA.value;
+    });
+
+    // Sample chips
+    sampleChips.addEventListener("click", e => {
+        const chip = e.target.closest(".sample-claim");
+        if (!chip) return;
+        e.preventDefault();
+        const text = chip.textContent.trim();
+        if (currentMode === "cek") {
+            klaimInput.value = text;
+            klaimInput.focus();
+        } else {
+            qaQuestion.value = text;
+            qaQuestion.focus();
+        }
+    });
+
+    // Navigation
     btnNewSearch.addEventListener("click", resetToWelcome);
     btnHome.addEventListener("click", resetToWelcome);
     themeToggle.addEventListener("click", toggleTheme);
+    btnShare.addEventListener("click", copyShareLink);
 
+    // Sidebar
     btnSidebarToggle.addEventListener("click", toggleSidebar);
     btnSidebarClose.addEventListener("click", closeSidebar);
     btnSidebarRailOpen.addEventListener("click", openSidebar);
     btnSidebarRailIndex.addEventListener("click", () => openSidebar({ focus: "index" }));
     btnSidebarRailHistory.addEventListener("click", () => openSidebar({ focus: "history" }));
-    btnSidebarRailNew.addEventListener("click", () => {
-        openSidebar();
-        resetToWelcome();
-        klaimInput.focus();
-    });
+    btnSidebarRailNew.addEventListener("click", () => { openSidebar(); resetToWelcome(); });
     sidebarOverlay.addEventListener("click", closeSidebar);
     btnClearHistory.addEventListener("click", clearHistory);
-    btnShare.addEventListener("click", copyShareLink);
+    searchTokohInput.addEventListener("input", filterTokohList);
 
-    // Sync strategy selectors
-    strategiSelect.addEventListener("change", () => {
-        strategiSidebar.value = strategiSelect.value;
-    });
-    strategiSidebar.addEventListener("change", () => {
-        strategiSelect.value = strategiSidebar.value;
-    });
-
-    // Sample claim chips
-    document.querySelectorAll(".sample-claim").forEach(link => {
-        link.addEventListener("click", e => {
-            e.preventDefault();
-            klaimInput.value = e.target.textContent;
-            klaimInput.focus();
-        });
-    });
-
-    // Escape closes sidebar
     document.addEventListener("keydown", e => {
-        if (e.key === "Escape" && appSidebar.classList.contains("is-open")) {
-            closeSidebar();
-        }
+        if (e.key === "Escape" && appSidebar.classList.contains("is-open")) closeSidebar();
     });
 
     loadHashState();
 });
+
+// ==========================================================================
+// MODE SWITCHING
+// ==========================================================================
+function switchMode(mode) {
+    currentMode = mode;
+
+    tabCek.classList.toggle("is-active", mode === "cek");
+    tabQA.classList.toggle("is-active",  mode === "qa");
+    tabCek.setAttribute("aria-selected", String(mode === "cek"));
+    tabQA.setAttribute("aria-selected",  String(mode === "qa"));
+
+    factCheckForm.classList.toggle("hidden", mode !== "cek");
+    qaForm.classList.toggle("hidden",        mode !== "qa");
+
+    // Strategy select visibility — hide in image/url scan (less relevant)
+    updateQAStrategyVisibility();
+    renderSampleChips();
+}
+
+function switchInputType(type) {
+    currentInputType = type;
+
+    [itabText, itabImage, itabUrl].forEach(t => {
+        t.classList.toggle("is-active", t.dataset.itype === type);
+        t.setAttribute("aria-selected", String(t.dataset.itype === type));
+    });
+    paneText.classList.toggle("hidden",  type !== "text");
+    paneImage.classList.toggle("hidden", type !== "image");
+    paneUrl.classList.toggle("hidden",   type !== "url");
+
+    // Mic only for text input
+    btnMicQA.classList.toggle("hidden", type !== "text");
+    updateQAStrategyVisibility();
+    updateQASubmitLabel();
+}
+
+function updateQAStrategyVisibility() {
+    const show = currentMode === "qa" && currentInputType === "text";
+    document.getElementById("qa-strategy-wrap").classList.toggle("hidden", !show);
+}
+
+function updateQASubmitLabel() {
+    const labels = { text: "Tanya", image: "Analisis Gambar", url: "Scan Artikel" };
+    qaSubmitText.textContent = labels[currentInputType] || "Kirim";
+}
+
+function renderSampleChips() {
+    if (currentMode === "cek") {
+        sampleLabel.textContent = "Contoh klaim";
+        sampleChips.innerHTML = SAMPLES.cek.map(s =>
+            `<a href="#" class="sample-claim">${escapeHtml(s)}</a>`
+        ).join("");
+    } else {
+        sampleLabel.textContent = "Contoh pertanyaan";
+        sampleChips.innerHTML = SAMPLES.qa.map(s =>
+            `<a href="#" class="sample-claim">${escapeHtml(s)}</a>`
+        ).join("");
+    }
+}
+
+// ==========================================================================
+// IMAGE FILE HANDLING
+// ==========================================================================
+function setImageFile(file) {
+    if (!file.type.startsWith("image/")) {
+        alert("File harus berupa gambar (JPG, PNG, WebP).");
+        return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+        alert("Ukuran gambar maksimal 10 MB.");
+        return;
+    }
+    selectedFile = file;
+    const reader = new FileReader();
+    reader.onload = e => {
+        previewImg.src = e.target.result;
+        previewFilename.textContent = file.name;
+        uploadArea.classList.add("hidden");
+        imagePreview.classList.remove("hidden");
+    };
+    reader.readAsDataURL(file);
+}
+
+function clearImageFile() {
+    selectedFile = null;
+    previewImg.src = "";
+    imageFileInput.value = "";
+    imagePreview.classList.add("hidden");
+    uploadArea.classList.remove("hidden");
+}
 
 // ==========================================================================
 // THEME
@@ -157,12 +360,9 @@ function updateThemeIcon(theme) {
 // SIDEBAR
 // ==========================================================================
 function initSidebar() {
-    if (localStorage.getItem(SIDEBAR_STATE_VERSION_KEY) !== SIDEBAR_STATE_VERSION) {
-        localStorage.setItem(SIDEBAR_KEY, "open");
-        localStorage.setItem(SIDEBAR_STATE_VERSION_KEY, SIDEBAR_STATE_VERSION);
-    }
-    const saved = localStorage.getItem(SIDEBAR_KEY) || "open";
-    applySidebarState(saved !== "closed", { persist: false });
+    localStorage.setItem(SIDEBAR_STATE_VERSION_KEY, SIDEBAR_STATE_VERSION);
+    localStorage.setItem(SIDEBAR_KEY, "open");
+    applySidebarState(true, { persist: false });
     renderHistoryList();
 }
 
@@ -173,38 +373,24 @@ function applySidebarState(isOpen, { persist = true } = {}) {
     mainWrap.classList.toggle("sidebar-collapsed", !isOpen);
     btnSidebarToggle.setAttribute("aria-expanded", String(isOpen));
     btnSidebarToggle.setAttribute("aria-label", isOpen ? "Tutup sidebar" : "Buka sidebar");
-    btnSidebarToggle.querySelector("i").className = isOpen ? "ph ph-sidebar-simple" : "ph ph-list";
-
     if (!isOpen) {
         sidebarOverlay.classList.remove("is-visible");
         sidebarOverlay.setAttribute("aria-hidden", "true");
     }
-
-    if (persist) {
-        localStorage.setItem(SIDEBAR_KEY, isOpen ? "open" : "closed");
-    }
+    if (persist) localStorage.setItem(SIDEBAR_KEY, isOpen ? "open" : "closed");
 }
 
 function openSidebar(options = {}) {
     applySidebarState(true);
-    if (window.innerWidth >= 769) {
-        sidebarOverlay.classList.remove("is-visible");
-        sidebarOverlay.setAttribute("aria-hidden", "true");
-    } else {
+    if (window.innerWidth < 769) {
         sidebarOverlay.classList.add("is-visible");
         sidebarOverlay.removeAttribute("aria-hidden");
     }
-
-    if (options.focus === "index") {
-        searchTokohInput.focus();
-    } else if (options.focus === "history") {
-        historyList.focus();
-    }
+    if (options.focus === "index")   searchTokohInput.focus();
+    else if (options.focus === "history") historyList.focus();
 }
 
-function closeSidebar() {
-    applySidebarState(false);
-}
+function closeSidebar() { applySidebarState(false); }
 
 function toggleSidebar() {
     if (appSidebar.classList.contains("is-open")) closeSidebar();
@@ -217,7 +403,7 @@ function toggleSidebar() {
 async function checkApiHealth() {
     try {
         const res = await fetch(`${API_BASE_URL}/`);
-        if (!res.ok) throw new Error("HTTP error");
+        if (!res.ok) throw new Error();
         const data = await res.json();
         setApiStatus(true, `API aktif · ${data.chunks || 0} chunks`);
     } catch {
@@ -242,14 +428,11 @@ function scheduleHealthRetry() {
 async function loadIndexedFigures() {
     try {
         const res = await fetch(`${API_BASE_URL}/artikel`);
-        if (!res.ok) throw new Error("Gagal memuat daftar tokoh");
-
+        if (!res.ok) throw new Error();
         allTokoh = await res.json();
         allTokoh.sort((a, b) => a.judul.localeCompare(b.judul));
-
         tokohCountBadge.textContent = allTokoh.length;
         renderTokohList(allTokoh);
-
         if (indexRetryTimer) { clearTimeout(indexRetryTimer); indexRetryTimer = null; }
     } catch {
         tokohCountBadge.textContent = "—";
@@ -268,9 +451,8 @@ function renderTokohList(list) {
         tokohList.innerHTML = `<li class="tokoh-loading">Tokoh tidak ditemukan.</li>`;
         return;
     }
-
     tokohList.innerHTML = list.map(t => `
-        <li data-title="${escapeHtml(t.judul)}" role="option">
+        <li data-title="${escapeAttribute(t.judul)}" role="option">
             <span class="tokoh-name">${escapeHtml(t.judul)}</span>
             <span class="tokoh-lang">${escapeHtml(t.bahasa)}</span>
         </li>
@@ -279,11 +461,16 @@ function renderTokohList(list) {
     tokohList.querySelectorAll("li[data-title]").forEach(item => {
         item.addEventListener("click", () => {
             const name = item.getAttribute("data-title");
-            klaimInput.value = `${name} adalah `;
+            if (currentMode === "cek") {
+                klaimInput.value = `${name} adalah `;
+                klaimInput.focus();
+                klaimInput.setSelectionRange(klaimInput.value.length, klaimInput.value.length);
+            } else {
+                qaQuestion.value = `Ceritakan tentang ${name}`;
+                qaQuestion.focus();
+            }
             resetToWelcome();
             if (window.innerWidth < 769) closeSidebar();
-            klaimInput.focus();
-            klaimInput.setSelectionRange(klaimInput.value.length, klaimInput.value.length);
         });
     });
 }
@@ -299,83 +486,97 @@ function filterTokohList() {
 function resetToWelcome() {
     resultContainer.classList.add("hidden");
     welcomeState.classList.remove("hidden");
-    resultState.classList.add("hidden");
-    errorState.classList.add("hidden");
-    loadingState.classList.add("hidden");
+    [resultState, qaResultState, scanResultState, errorState, loadingState].forEach(el => {
+        el.classList.add("hidden");
+    });
 
+    // Re-enable inputs
     klaimInput.disabled       = false;
+    qaQuestion.disabled       = false;
+    urlInput.disabled         = false;
     strategiSelect.disabled   = false;
     strategiSidebar.disabled  = false;
+    strategiQA.disabled       = false;
     btnSubmit.disabled        = false;
+    btnQASubmit.disabled      = false;
     btnSubmitText.textContent = "Cek Fakta";
     btnSubmitIcon.classList.remove("hidden");
     btnSubmitSpinner.classList.add("hidden");
+    qaSubmitText.textContent  = updateQASubmitLabel() || qaSubmitText.textContent;
+    qaSubmitIcon.classList.remove("hidden");
+    qaSubmitSpinner.classList.add("hidden");
     clearHashState();
 }
 
-function setLoadingState(isLoading) {
-    klaimInput.disabled      = isLoading;
-    strategiSelect.disabled  = isLoading;
-    strategiSidebar.disabled = isLoading;
-    btnSubmit.disabled       = isLoading;
+function setLoadingState(isLoading, label = "Menjalankan retrieval dan inferensi...") {
+    const inputs = [klaimInput, qaQuestion, urlInput, strategiSelect, strategiSidebar, strategiQA];
+    inputs.forEach(el => { el.disabled = isLoading; });
+    btnSubmit.disabled   = isLoading;
+    btnQASubmit.disabled = isLoading;
+    loadingLabel.textContent = label;
 
     if (isLoading) {
-        btnSubmitText.textContent = "Memverifikasi...";
-        btnSubmitIcon.classList.add("hidden");
-        btnSubmitSpinner.classList.remove("hidden");
-
-        queryDisplay.textContent = klaimInput.value.trim();
         welcomeState.classList.add("hidden");
         resultContainer.classList.remove("hidden");
         loadingState.classList.remove("hidden");
-        errorState.classList.add("hidden");
-        resultState.classList.add("hidden");
+        [resultState, qaResultState, scanResultState, errorState].forEach(el => el.classList.add("hidden"));
+
+        // Spinner on active submit btn
+        if (currentMode === "cek") {
+            btnSubmitText.textContent = "Memverifikasi...";
+            btnSubmitIcon.classList.add("hidden");
+            btnSubmitSpinner.classList.remove("hidden");
+        } else {
+            qaSubmitIcon.classList.add("hidden");
+            qaSubmitSpinner.classList.remove("hidden");
+        }
     } else {
+        loadingState.classList.add("hidden");
         btnSubmitText.textContent = "Cek Fakta";
         btnSubmitIcon.classList.remove("hidden");
         btnSubmitSpinner.classList.add("hidden");
-        loadingState.classList.add("hidden");
+        qaSubmitIcon.classList.remove("hidden");
+        qaSubmitSpinner.classList.add("hidden");
     }
 }
 
 function showError(message) {
     errorMsg.textContent = message;
     errorState.classList.remove("hidden");
-    resultState.classList.add("hidden");
+    [resultState, qaResultState, scanResultState].forEach(el => el.classList.add("hidden"));
+}
+
+function showResultBadge(mode) {
+    const labels = { cek: "CEK", qa: "QA", scan: "SCAN" };
+    resultModeBadge.textContent = labels[mode] || mode.toUpperCase();
+    resultModeBadge.className = `result-mode-badge badge--${mode}`;
 }
 
 // ==========================================================================
-// FACT CHECK SUBMIT
+// FACT-CHECK SUBMIT
 // ==========================================================================
 async function handleFactCheckSubmit(e) {
     e.preventDefault();
-
     const klaim    = klaimInput.value.trim();
     const strategi = strategiSelect.value;
-    const top_k    = 5;
-
     if (!klaim) return;
 
+    queryDisplay.textContent = klaim;
+    showResultBadge("cek");
     setLoadingState(true);
 
     try {
         const res = await fetch(`${API_BASE_URL}/cek-fakta`, {
-            method:  "POST",
+            method: "POST",
             headers: { "Content-Type": "application/json" },
-            body:    JSON.stringify({ klaim, strategi, top_k }),
+            body: JSON.stringify({ klaim, strategi, top_k: 5 }),
         });
-
-        if (!res.ok) {
-            const err = await res.json();
-            throw new Error(err.detail || "Terjadi kesalahan di server.");
-        }
-
+        if (!res.ok) { const err = await res.json(); throw new Error(err.detail || "Terjadi kesalahan."); }
         const data = await res.json();
         setApiStatus(true, "API aktif");
-        if (allTokoh.length === 0) loadIndexedFigures();
-        renderResult(data);
-        setHashState(klaim, strategi);
-        saveToHistory(data, klaim, strategi);
+        renderFactCheckResult(data);
+        setHashState(klaim, strategi, "cek");
+        saveToHistory({ type: "cek", label: klaim, strategi, verdict: data.verdict, kepercayaan: data.kepercayaan });
     } catch (err) {
         showError(err.message);
     } finally {
@@ -384,9 +585,113 @@ async function handleFactCheckSubmit(e) {
 }
 
 // ==========================================================================
-// RENDER RESULT
+// QA SUBMIT
 // ==========================================================================
-function renderResult(data) {
+async function handleQASubmit(e) {
+    e.preventDefault();
+    const itype = currentInputType;
+
+    if (itype === "text") {
+        await submitQAText();
+    } else if (itype === "image") {
+        await submitQAImage();
+    } else {
+        await submitQAUrl();
+    }
+}
+
+async function submitQAText() {
+    const pertanyaan = qaQuestion.value.trim();
+    if (!pertanyaan) return;
+
+    queryDisplay.textContent = pertanyaan;
+    showResultBadge("qa");
+    setLoadingState(true, "Mencari informasi relevan...");
+
+    try {
+        const res = await fetch(`${API_BASE_URL}/qa`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ pertanyaan, top_k: 5 }),
+        });
+        if (!res.ok) { const err = await res.json(); throw new Error(err.detail || "Terjadi kesalahan."); }
+        const data = await res.json();
+        setApiStatus(true, "API aktif");
+        renderQAResult(data);
+        setHashState(pertanyaan, strategiQA.value, "qa");
+        saveToHistory({ type: "qa", label: pertanyaan, strategi: strategiQA.value });
+    } catch (err) {
+        showError(err.message);
+    } finally {
+        setLoadingState(false);
+    }
+}
+
+async function submitQAImage() {
+    if (!selectedFile) { alert("Pilih gambar terlebih dahulu."); return; }
+
+    queryDisplay.textContent = `Analisis gambar: ${selectedFile.name}`;
+    showResultBadge("scan");
+    setLoadingState(true, "Mengekstrak teks dari gambar dengan vision AI...");
+
+    try {
+        const formData = new FormData();
+        formData.append("file", selectedFile);
+
+        const res = await fetch(`${API_BASE_URL}/qa-image`, { method: "POST", body: formData });
+        if (!res.ok) { const err = await res.json(); throw new Error(err.detail || "Gagal memproses gambar."); }
+        const data = await res.json();
+        setApiStatus(true, "API aktif");
+        renderScanResult({
+            judul_artikel: selectedFile.name,
+            ringkasan_artikel: data.teks_diekstrak,
+            klaim_ditemukan: data.klaim_ditemukan,
+            hasil: data.hasil,
+            waktu_total_ms: data.waktu_total_ms,
+            _is_image: true,
+        });
+        saveToHistory({ type: "scan", label: `Gambar: ${selectedFile.name}` });
+    } catch (err) {
+        showError(err.message);
+    } finally {
+        setLoadingState(false);
+    }
+}
+
+async function submitQAUrl() {
+    const url = urlInput.value.trim();
+    if (!url) { alert("Masukkan URL artikel."); return; }
+    if (!url.startsWith("http://") && !url.startsWith("https://")) {
+        alert("URL harus dimulai dengan http:// atau https://"); return;
+    }
+
+    const strategi = strategiQA.value;
+    queryDisplay.textContent = url;
+    showResultBadge("scan");
+    setLoadingState(true, "Mengambil artikel dari URL...");
+
+    try {
+        const res = await fetch(`${API_BASE_URL}/scan-url`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ url, strategi }),
+        });
+        if (!res.ok) { const err = await res.json(); throw new Error(err.detail || "Gagal memproses URL."); }
+        const data = await res.json();
+        setApiStatus(true, "API aktif");
+        renderScanResult(data);
+        saveToHistory({ type: "scan", label: url });
+    } catch (err) {
+        showError(err.message);
+    } finally {
+        setLoadingState(false);
+    }
+}
+
+// ==========================================================================
+// RENDER — Fact-check
+// ==========================================================================
+function renderFactCheckResult(data) {
     const verdict = data.verdict.toUpperCase();
 
     verdictContainer.className = "verdict-panel";
@@ -404,51 +709,14 @@ function renderResult(data) {
         verdictIcon.innerHTML = `<i class="ph ph-question" aria-hidden="true"></i>`;
     }
 
-    const confidenceVal = Math.round(data.kepercayaan * 100);
-    confidencePercentage.textContent = `${confidenceVal}%`;
-    confidenceFill.style.width = `${confidenceVal}%`;
-    verdictSummary.textContent = data.penjelasan || "Tidak ada kesimpulan singkat.";
+    const pct = Math.round(data.kepercayaan * 100);
+    confidencePercentage.textContent = `${pct}%`;
+    confidenceFill.style.width = `${pct}%`;
+    verdictSummary.textContent = data.penjelasan || "";
 
     if (data.bukti && data.bukti.length > 0) {
-        evidenceContainer.innerHTML = data.bukti.map((ev, i) => {
-            const scorePercent = Math.round(ev.skor * 100);
-            const domain = ev.bahasa === "id" ? "id.wikipedia.org" : "en.wikipedia.org";
-            return `
-                <a href="${escapeAttribute(ev.url)}" target="_blank" rel="noreferrer" class="source-card">
-                    <div class="source-card-top">
-                        <span class="source-num">${i + 1}</span>
-                        <span class="source-score-sm">${scorePercent}%</span>
-                    </div>
-                    <div class="source-name">${escapeHtml(ev.judul)}</div>
-                    <div class="source-detail">${escapeHtml(ev.seksi)} · ${domain}</div>
-                </a>
-            `;
-        }).join("");
-
-        fullEvidenceContainer.innerHTML = data.bukti.map((ev, i) => {
-            const highlighted  = highlightKeywords(ev.teks, data.klaim);
-            const scorePercent = Math.round(ev.skor * 100);
-            return `
-                <article class="evidence-card">
-                    <div class="evidence-head">
-                        <div class="ev-source">
-                            <i class="ph ph-globe" aria-hidden="true"></i>
-                            <span class="ev-title">${escapeHtml(ev.judul)}</span>
-                            <span class="ev-section">${escapeHtml(ev.seksi)}</span>
-                        </div>
-                        <span class="ev-score">${scorePercent}%</span>
-                    </div>
-                    <p class="ev-text">"${highlighted}"</p>
-                    <div class="ev-foot">
-                        <a href="${escapeAttribute(ev.url)}" target="_blank" rel="noreferrer" class="ev-link">
-                            Buka Wikipedia <i class="ph ph-arrow-square-out" aria-hidden="true"></i>
-                        </a>
-                        <span class="ev-lang">${escapeHtml(ev.bahasa)}</span>
-                    </div>
-                </article>
-            `;
-        }).join("");
-
+        evidenceContainer.innerHTML = buildSourceCards(data.bukti, data.klaim);
+        fullEvidenceContainer.innerHTML = buildFullEvidence(data.bukti, data.klaim);
         buktiDetails.removeAttribute("hidden");
     } else {
         evidenceContainer.innerHTML = `<div class="no-sources">Tidak ada bukti relevan yang lolos threshold minimal.</div>`;
@@ -476,6 +744,152 @@ function renderResult(data) {
 }
 
 // ==========================================================================
+// RENDER — QA
+// ==========================================================================
+function renderQAResult(data) {
+    if (data.sumber && data.sumber.length > 0) {
+        qaEvidenceContainer.innerHTML = data.sumber.map((s, i) => {
+            const domain = s.bahasa === "id" ? "id.wikipedia.org" : "en.wikipedia.org";
+            return `
+                <a href="${escapeAttribute(s.url)}" target="_blank" rel="noreferrer" class="source-card">
+                    <div class="source-card-top">
+                        <span class="source-num">${i + 1}</span>
+                        <span class="source-score-sm">${Math.round(s.skor * 100)}%</span>
+                    </div>
+                    <div class="source-name">${escapeHtml(s.judul)}</div>
+                    <div class="source-detail">${escapeHtml(s.seksi)} · ${domain}</div>
+                </a>
+            `;
+        }).join("");
+    } else {
+        qaEvidenceContainer.innerHTML = `<div class="no-sources">Tidak ada sumber relevan ditemukan.</div>`;
+    }
+
+    qaAnswerText.textContent = data.jawaban || "Tidak ada jawaban yang dihasilkan.";
+    qaRetrievalTime.textContent = `${data.waktu_retrieval_ms.toFixed(1)} ms`;
+    qaLlmTime.textContent       = `${data.waktu_llm_ms.toFixed(1)} ms`;
+    qaTotalTime.textContent     = `${(data.waktu_retrieval_ms + data.waktu_llm_ms).toFixed(1)} ms`;
+
+    qaResultState.classList.remove("hidden");
+}
+
+// ==========================================================================
+// RENDER — Scan (URL + Image)
+// ==========================================================================
+function renderScanResult(data) {
+    const isImage = data._is_image;
+    const icon    = isImage ? "ph-image" : "ph-newspaper";
+    const label   = isImage ? "Teks diekstrak dari gambar" : "Artikel yang dipindai";
+
+    scanArticleCard.innerHTML = `
+        <i class="ph ${icon} scan-article-icon" aria-hidden="true"></i>
+        <div class="scan-article-meta">
+            <div class="scan-article-label">${label}</div>
+            <div class="scan-article-title">${escapeHtml(data.judul_artikel || data.url || "—")}</div>
+            <div class="scan-article-summary">${escapeHtml(data.ringkasan_artikel || "")}</div>
+        </div>
+    `;
+
+    const hasil = data.hasil || [];
+    scanClaimsCount.textContent = hasil.length;
+
+    if (hasil.length === 0) {
+        scanClaimsList.innerHTML = `<div class="no-sources">Tidak ada klaim yang berhasil diekstrak.</div>`;
+    } else {
+        scanClaimsList.innerHTML = hasil.map((item, i) => {
+            const verdict = (item.verdict || "").toUpperCase();
+            const verdictClass = verdict === "DIDUKUNG" ? "hist-verdict--didukung"
+                               : verdict === "DIBANTAH" ? "hist-verdict--dibantah"
+                               : "hist-verdict--tidak-cukup";
+            const verdictLabel = verdict === "DIDUKUNG" ? "DIDUKUNG"
+                               : verdict === "DIBANTAH" ? "DIBANTAH"
+                               : "TIDAK CUKUP";
+            const pct = Math.round((item.kepercayaan || 0) * 100);
+
+            const sourcesHtml = (item.bukti || []).map((ev, j) => {
+                const domain = ev.bahasa === "id" ? "id.wikipedia.org" : "en.wikipedia.org";
+                return `
+                    <a href="${escapeAttribute(ev.url)}" target="_blank" rel="noreferrer" class="source-card">
+                        <div class="source-card-top">
+                            <span class="source-num">${j + 1}</span>
+                            <span class="source-score-sm">${Math.round(ev.skor * 100)}%</span>
+                        </div>
+                        <div class="source-name">${escapeHtml(ev.judul)}</div>
+                        <div class="source-detail">${escapeHtml(ev.seksi)} · ${domain}</div>
+                    </a>
+                `;
+            }).join("");
+
+            return `
+                <details class="scan-claim-item">
+                    <summary class="scan-claim-summary">
+                        <span class="scan-claim-num">${i + 1}</span>
+                        <span class="scan-claim-text">${escapeHtml(item.klaim)}</span>
+                        <div class="scan-claim-badges">
+                            <span class="hist-verdict ${verdictClass}">${verdictLabel}</span>
+                            <span class="scan-claim-conf">${pct}%</span>
+                        </div>
+                        <i class="ph ph-caret-down scan-claim-caret" aria-hidden="true"></i>
+                    </summary>
+                    <div class="scan-claim-body">
+                        <p class="scan-claim-explanation">${escapeHtml(item.penjelasan || "")}</p>
+                        ${sourcesHtml ? `<div class="scan-claim-sources">${sourcesHtml}</div>` : ""}
+                    </div>
+                </details>
+            `;
+        }).join("");
+    }
+
+    scanTotalTime.textContent = `${(data.waktu_total_ms || 0).toFixed(1)} ms`;
+    scanResultState.classList.remove("hidden");
+}
+
+// ==========================================================================
+// SOURCE CARD HELPERS
+// ==========================================================================
+function buildSourceCards(bukti, klaim) {
+    return bukti.map((ev, i) => {
+        const domain = ev.bahasa === "id" ? "id.wikipedia.org" : "en.wikipedia.org";
+        return `
+            <a href="${escapeAttribute(ev.url)}" target="_blank" rel="noreferrer" class="source-card">
+                <div class="source-card-top">
+                    <span class="source-num">${i + 1}</span>
+                    <span class="source-score-sm">${Math.round(ev.skor * 100)}%</span>
+                </div>
+                <div class="source-name">${escapeHtml(ev.judul)}</div>
+                <div class="source-detail">${escapeHtml(ev.seksi)} · ${domain}</div>
+            </a>
+        `;
+    }).join("");
+}
+
+function buildFullEvidence(bukti, klaim) {
+    return bukti.map((ev, i) => {
+        const highlighted  = highlightKeywords(ev.teks, klaim);
+        const scorePercent = Math.round(ev.skor * 100);
+        return `
+            <article class="evidence-card">
+                <div class="evidence-head">
+                    <div class="ev-source">
+                        <i class="ph ph-globe" aria-hidden="true"></i>
+                        <span class="ev-title">${escapeHtml(ev.judul)}</span>
+                        <span class="ev-section">${escapeHtml(ev.seksi)}</span>
+                    </div>
+                    <span class="ev-score">${scorePercent}%</span>
+                </div>
+                <p class="ev-text">"${highlighted}"</p>
+                <div class="ev-foot">
+                    <a href="${escapeAttribute(ev.url)}" target="_blank" rel="noreferrer" class="ev-link">
+                        Buka Wikipedia <i class="ph ph-arrow-square-out" aria-hidden="true"></i>
+                    </a>
+                    <span class="ev-lang">${escapeHtml(ev.bahasa)}</span>
+                </div>
+            </article>
+        `;
+    }).join("");
+}
+
+// ==========================================================================
 // HISTORY
 // ==========================================================================
 function loadHistory() {
@@ -483,16 +897,9 @@ function loadHistory() {
     catch { return []; }
 }
 
-function saveToHistory(data, klaim, strategi) {
-    const entries = loadHistory().filter(e => e.klaim !== klaim);
-    entries.unshift({
-        id:          Date.now(),
-        klaim,
-        strategi,
-        verdict:     data.verdict,
-        kepercayaan: data.kepercayaan,
-        timestamp:   Date.now(),
-    });
+function saveToHistory({ type, label, strategi, verdict, kepercayaan }) {
+    const entries = loadHistory().filter(e => e.label !== label || e.type !== type);
+    entries.unshift({ id: Date.now(), type: type || "cek", label, strategi, verdict, kepercayaan, timestamp: Date.now() });
     localStorage.setItem(HISTORY_KEY, JSON.stringify(entries.slice(0, HISTORY_MAX)));
     renderHistoryList();
 }
@@ -514,7 +921,7 @@ function timeAgo(ts) {
 }
 
 function histVerdictClass(verdict) {
-    const v = String(verdict).toUpperCase();
+    const v = String(verdict || "").toUpperCase();
     if (v === "DIDUKUNG") return "hist-verdict--didukung";
     if (v === "DIBANTAH") return "hist-verdict--dibantah";
     return "hist-verdict--tidak-cukup";
@@ -527,29 +934,57 @@ function renderHistoryList() {
         return;
     }
 
-    historyList.innerHTML = entries.map(e => `
-        <li class="hist-entry"
-            data-klaim="${escapeAttribute(e.klaim)}"
-            data-strategi="${escapeAttribute(e.strategi)}"
-            role="option"
-            tabindex="0">
-            <div class="hist-entry-row">
-                <span class="hist-entry-klaim">${escapeHtml(e.klaim)}</span>
-                <span class="hist-verdict ${histVerdictClass(e.verdict)}">${escapeHtml(e.verdict)}</span>
-            </div>
-            <span class="hist-entry-time">${timeAgo(e.timestamp)}</span>
-        </li>
-    `).join("");
+    historyList.innerHTML = entries.map(e => {
+        const typeTag = `<span class="hist-type-tag hist-type-tag--${e.type || 'cek'}">${(e.type || 'cek').toUpperCase()}</span>`;
+        const verdictTag = e.verdict
+            ? `<span class="hist-verdict ${histVerdictClass(e.verdict)}">${escapeHtml(e.verdict)}</span>`
+            : "";
+        return `
+            <li class="hist-entry"
+                data-label="${escapeAttribute(e.label)}"
+                data-type="${escapeAttribute(e.type || 'cek')}"
+                data-strategi="${escapeAttribute(e.strategi || 'cot')}"
+                role="option" tabindex="0">
+                <div class="hist-entry-row">
+                    <span class="hist-entry-klaim">${escapeHtml(e.label)}</span>
+                    <div style="display:flex;gap:4px;flex-shrink:0;align-items:center">
+                        ${typeTag}
+                        ${verdictTag}
+                    </div>
+                </div>
+                <span class="hist-entry-time">${timeAgo(e.timestamp)}</span>
+            </li>
+        `;
+    }).join("");
 
     historyList.querySelectorAll(".hist-entry").forEach(item => {
         const activate = () => {
-            const k = item.getAttribute("data-klaim");
-            const s = item.getAttribute("data-strategi");
-            klaimInput.value = k;
-            strategiSelect.value  = s;
-            strategiSidebar.value = s;
-            if (window.innerWidth < 769) closeSidebar();
-            factCheckForm.dispatchEvent(new Event("submit"));
+            const type    = item.getAttribute("data-type");
+            const label   = item.getAttribute("data-label");
+            const strategi = item.getAttribute("data-strategi");
+
+            if (type === "cek") {
+                switchMode("cek");
+                klaimInput.value = label;
+                strategiSelect.value  = strategi;
+                strategiSidebar.value = strategi;
+                if (window.innerWidth < 769) closeSidebar();
+                factCheckForm.dispatchEvent(new Event("submit"));
+            } else if (type === "qa") {
+                switchMode("qa");
+                switchInputType("text");
+                qaQuestion.value = label;
+                if (window.innerWidth < 769) closeSidebar();
+                qaForm.dispatchEvent(new Event("submit"));
+            } else if (type === "scan") {
+                switchMode("qa");
+                if (label.startsWith("http")) {
+                    switchInputType("url");
+                    urlInput.value = label;
+                }
+                if (window.innerWidth < 769) closeSidebar();
+                qaForm.dispatchEvent(new Event("submit"));
+            }
         };
         item.addEventListener("click", activate);
         item.addEventListener("keydown", e => {
@@ -561,10 +996,11 @@ function renderHistoryList() {
 // ==========================================================================
 // URL STATE
 // ==========================================================================
-function setHashState(klaim, strategi) {
+function setHashState(query, strategi, type = "cek") {
     const params = new URLSearchParams();
-    params.set("q", klaim);
+    params.set("q", query);
     params.set("s", strategi);
+    params.set("t", type);
     history.replaceState(null, "", "#" + params.toString());
 }
 
@@ -578,13 +1014,23 @@ function loadHashState() {
         const params = new URLSearchParams(window.location.hash.slice(1));
         const q = params.get("q");
         const s = params.get("s");
+        const t = params.get("t") || "cek";
         if (!q) return;
-        klaimInput.value = q;
-        if (s && ["cot", "structured", "zero_shot"].includes(s)) {
-            strategiSelect.value  = s;
-            strategiSidebar.value = s;
+
+        if (t === "cek") {
+            switchMode("cek");
+            klaimInput.value = q;
+            if (s && ["cot", "structured", "zero_shot"].includes(s)) {
+                strategiSelect.value  = s;
+                strategiSidebar.value = s;
+            }
+            factCheckForm.dispatchEvent(new Event("submit"));
+        } else if (t === "qa") {
+            switchMode("qa");
+            switchInputType("text");
+            qaQuestion.value = q;
+            qaForm.dispatchEvent(new Event("submit"));
         }
-        factCheckForm.dispatchEvent(new Event("submit"));
     } catch { /* invalid hash — ignore */ }
 }
 
@@ -615,58 +1061,50 @@ function fallbackCopy(text, cb) {
 }
 
 // ==========================================================================
-// VOICE INPUT  (Web Speech API — no backend required)
+// VOICE INPUT
 // ==========================================================================
 function initVoiceInput() {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-
     if (!SR) {
         btnMic.classList.add("hidden");
+        btnMicQA.classList.add("hidden");
         return;
     }
 
-    const recognition = new SR();
-    recognition.lang             = "id-ID";
-    recognition.continuous       = false;
-    recognition.interimResults   = true;
+    setupMic(btnMic,   micIcon,   () => klaimInput);
+    setupMic(btnMicQA, micQAIcon, () => qaQuestion);
+}
 
+function setupMic(btn, icon, getInput) {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SR();
+    recognition.lang           = "id-ID";
+    recognition.continuous     = false;
+    recognition.interimResults = true;
     let recording = false;
 
     recognition.onstart = () => {
         recording = true;
-        btnMic.classList.add("recording");
-        btnMic.setAttribute("aria-label", "Hentikan rekaman");
-        micIcon.className = "ph ph-microphone-slash";
+        btn.classList.add("recording");
+        btn.setAttribute("aria-label", "Hentikan rekaman");
+        icon.className = "ph ph-microphone-slash";
     };
-
     recognition.onresult = e => {
-        const transcript = Array.from(e.results)
-            .map(r => r[0].transcript)
-            .join("");
-        klaimInput.value = transcript;
+        getInput().value = Array.from(e.results).map(r => r[0].transcript).join("");
     };
-
     recognition.onend = () => {
         recording = false;
-        btnMic.classList.remove("recording");
-        btnMic.setAttribute("aria-label", "Input via mikrofon");
-        micIcon.className = "ph ph-microphone";
+        btn.classList.remove("recording");
+        btn.setAttribute("aria-label", "Input via mikrofon");
+        icon.className = "ph ph-microphone";
     };
-
     recognition.onerror = e => {
         recording = false;
-        btnMic.classList.remove("recording");
-        btnMic.setAttribute("aria-label", "Input via mikrofon");
-        micIcon.className = e.error === "not-allowed" ? "ph ph-microphone-slash" : "ph ph-microphone";
-        if (e.error === "not-allowed") {
-            setTimeout(() => { micIcon.className = "ph ph-microphone"; }, 2000);
-        }
+        btn.classList.remove("recording");
+        icon.className = e.error === "not-allowed" ? "ph ph-microphone-slash" : "ph ph-microphone";
+        if (e.error === "not-allowed") setTimeout(() => { icon.className = "ph ph-microphone"; }, 2000);
     };
-
-    btnMic.addEventListener("click", () => {
-        if (recording) recognition.stop();
-        else           recognition.start();
-    });
+    btn.addEventListener("click", () => { if (recording) recognition.stop(); else recognition.start(); });
 }
 
 // ==========================================================================
@@ -674,23 +1112,19 @@ function initVoiceInput() {
 // ==========================================================================
 function highlightKeywords(text, claim) {
     if (!claim) return escapeHtml(text);
-
     const ignoreList = new Set([
-        "adalah", "yang", "dan", "di", "dari", "ke", "pada", "itu", "ini",
-        "dengan", "atau", "sebagai", "untuk", "ia", "dia", "mereka", "kita",
-        "kamu", "saya", "akan", "telah", "sudah", "belum", "sedang", "dalam",
+        "adalah","yang","dan","di","dari","ke","pada","itu","ini",
+        "dengan","atau","sebagai","untuk","ia","dia","mereka","kita",
+        "kamu","saya","akan","telah","sudah","belum","sedang","dalam",
     ]);
-
     const words = claim.toLowerCase()
         .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?"']/g, "")
         .split(/\s+/)
         .filter(w => w.length > 2 && !ignoreList.has(w));
-
     const safe = escapeHtml(text);
     if (words.length === 0) return safe;
-
     const escaped = words.map(w => w.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&"));
-    const regex   = new RegExp(`\\b(${escaped.join("|")})\\b`, "gi");
+    const regex = new RegExp(`\\b(${escaped.join("|")})\\b`, "gi");
     return safe.replace(regex, m => `<mark class="highlight">${m}</mark>`);
 }
 

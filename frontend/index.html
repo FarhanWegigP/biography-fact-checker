@@ -16,11 +16,7 @@
     <aside class="app-sidebar is-open" id="app-sidebar" aria-label="Panel navigasi">
         <div class="sidebar-rail" aria-label="Navigasi cepat">
             <button class="rail-btn rail-logo" id="btn-sidebar-rail-open" aria-label="Buka sidebar" title="Buka sidebar">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                    <polyline points="14 2 14 8 20 8"/>
-                    <polyline points="9 12 11 14 15 10"/>
-                </svg>
+                <i class="ph ph-list" aria-hidden="true"></i>
             </button>
             <button class="rail-btn" id="btn-sidebar-rail-index" aria-label="Buka indeks tokoh" title="Indeks tokoh">
                 <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
@@ -33,21 +29,13 @@
             </button>
         </div>
         <div class="sidebar-head">
-            <div class="sidebar-logo">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                    <polyline points="14 2 14 8 20 8"/>
-                    <polyline points="9 12 11 14 15 10"/>
-                </svg>
-                BioFactChecker
-            </div>
+            <div class="sidebar-logo">BioFactChecker</div>
             <button class="sidebar-close-btn" id="btn-sidebar-close" aria-label="Tutup sidebar">
-                <i class="ph ph-x" aria-hidden="true"></i>
+                <i class="ph ph-list" aria-hidden="true"></i>
             </button>
         </div>
 
         <div class="sidebar-body">
-
             <!-- History -->
             <div class="sidebar-section">
                 <div class="sidebar-section-hdr">
@@ -73,7 +61,6 @@
                     <li class="tokoh-loading">Memuat indeks...</li>
                 </ul>
             </div>
-
         </div>
     </aside>
 
@@ -83,19 +70,14 @@
     <!-- ── Main Wrap ─────────────────────────────────────── -->
     <div class="main-wrap" id="main-wrap">
 
-        <!-- ── Nav ──────────────────────────────────── -->
+        <!-- ── Nav ──────────────────────────────────────── -->
         <nav class="top-nav">
             <div class="nav-inner">
                 <div class="nav-left">
                     <button class="icon-btn" id="btn-sidebar-toggle" aria-label="Tutup sidebar" aria-expanded="true">
-                        <i class="ph ph-sidebar-simple" aria-hidden="true"></i>
+                        <i class="ph ph-list" aria-hidden="true"></i>
                     </button>
                     <button class="nav-brand" id="btn-home" aria-label="Ke halaman utama">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                            <polyline points="14 2 14 8 20 8"/>
-                            <polyline points="9 12 11 14 15 10"/>
-                        </svg>
                         BioFactChecker
                     </button>
                 </div>
@@ -111,7 +93,7 @@
             </div>
         </nav>
 
-        <!-- ── Welcome ──────────────────────────────── -->
+        <!-- ── Welcome ──────────────────────────────────── -->
         <div id="welcome-state" class="welcome-page">
             <div class="welcome-inner">
 
@@ -121,15 +103,28 @@
                         RAG · Wikipedia
                     </div>
                     <h1>BioFactChecker</h1>
-                    <p class="welcome-tagline">Verifikasi klaim biografi dengan AI berbasis RAG</p>
+                    <p class="welcome-tagline">Verifikasi klaim & tanya-jawab berbasis RAG</p>
                 </div>
 
+                <!-- ── Mode toggle ───────────────────────── -->
+                <div class="mode-toggle" role="tablist" aria-label="Pilih mode">
+                    <button class="mode-tab is-active" id="tab-cek" role="tab" aria-selected="true" data-mode="cek">
+                        <i class="ph ph-check-fat" aria-hidden="true"></i>
+                        Cek Fakta
+                    </button>
+                    <button class="mode-tab" id="tab-qa" role="tab" aria-selected="false" data-mode="qa">
+                        <i class="ph ph-chat-dots" aria-hidden="true"></i>
+                        Tanya Jawab
+                    </button>
+                </div>
+
+                <!-- ── Fact-Check Form ────────────────────── -->
                 <form id="factcheck-form" class="search-form" autocomplete="off">
                     <div class="search-box-wrap">
                         <textarea
                             id="klaim"
                             class="search-textarea"
-                            placeholder="Masukkan klaim biografi yang ingin dicek..."
+                            placeholder="Masukkan klaim yang ingin dicek..."
                             rows="3"
                             required
                         ></textarea>
@@ -155,9 +150,92 @@
                     </div>
                 </form>
 
+                <!-- ── QA Panel ───────────────────────────── -->
+                <form id="qa-form" class="search-form hidden" autocomplete="off">
+                    <div class="search-box-wrap">
+
+                        <!-- Input type tabs -->
+                        <div class="input-type-tabs" role="tablist" aria-label="Tipe input">
+                            <button type="button" class="input-tab is-active" id="itab-text" role="tab" data-itype="text" aria-selected="true">
+                                <i class="ph ph-text-t" aria-hidden="true"></i> Teks
+                            </button>
+                            <button type="button" class="input-tab" id="itab-image" role="tab" data-itype="image" aria-selected="false">
+                                <i class="ph ph-image" aria-hidden="true"></i> Gambar
+                            </button>
+                            <button type="button" class="input-tab" id="itab-url" role="tab" data-itype="url" aria-selected="false">
+                                <i class="ph ph-link" aria-hidden="true"></i> URL Artikel
+                            </button>
+                        </div>
+
+                        <!-- Pane: Teks -->
+                        <div class="qa-input-pane" id="pane-text">
+                            <textarea
+                                id="qa-question"
+                                class="search-textarea"
+                                placeholder="Tanya apa saja tentang tokoh atau sejarah Indonesia..."
+                                rows="3"
+                            ></textarea>
+                        </div>
+
+                        <!-- Pane: Gambar -->
+                        <div class="qa-input-pane hidden" id="pane-image">
+                            <label class="upload-area" id="upload-area" for="image-file-input" tabindex="0" role="button" aria-label="Klik atau seret gambar">
+                                <i class="ph ph-upload-simple upload-icon" aria-hidden="true"></i>
+                                <span class="upload-text">Klik atau seret gambar ke sini</span>
+                                <span class="upload-hint">JPG · PNG · WebP — maks 10 MB</span>
+                                <input type="file" id="image-file-input" accept="image/jpeg,image/png,image/webp" aria-hidden="true">
+                            </label>
+                            <div id="image-preview" class="image-preview hidden">
+                                <img id="preview-img" alt="Preview" src="">
+                                <button type="button" id="btn-remove-image" class="btn-remove-image" aria-label="Hapus gambar">
+                                    <i class="ph ph-x" aria-hidden="true"></i>
+                                </button>
+                                <div id="preview-filename" class="preview-filename"></div>
+                            </div>
+                        </div>
+
+                        <!-- Pane: URL -->
+                        <div class="qa-input-pane hidden" id="pane-url">
+                            <div class="url-input-wrap">
+                                <i class="ph ph-globe" aria-hidden="true"></i>
+                                <input
+                                    type="url"
+                                    id="url-input"
+                                    class="url-text-input"
+                                    placeholder="https://www.kompas.com/artikel-berita..."
+                                    autocomplete="off"
+                                    spellcheck="false"
+                                >
+                            </div>
+                        </div>
+
+                        <!-- Footer -->
+                        <div class="search-form-footer">
+                            <div class="mode-control" id="qa-strategy-wrap">
+                                <select id="strategi-qa" class="mode-select" aria-label="Mode penalaran">
+                                    <option value="cot" selected>Chain-of-Thought</option>
+                                    <option value="structured">Structured JSON</option>
+                                    <option value="zero_shot">Zero-Shot</option>
+                                </select>
+                            </div>
+                            <div class="form-actions">
+                                <button type="button" id="btn-mic-qa" class="mic-btn" aria-label="Input via mikrofon" title="Bicara untuk input pertanyaan">
+                                    <i class="ph ph-microphone" id="mic-qa-icon" aria-hidden="true"></i>
+                                </button>
+                                <button type="submit" id="btn-qa-submit" class="submit-btn">
+                                    <span class="btn-text" id="qa-btn-text">Tanya</span>
+                                    <i class="ph ph-arrow-right btn-icon" id="qa-btn-icon" aria-hidden="true"></i>
+                                    <i class="ph ph-circle-notch btn-spinner hidden" id="qa-btn-spinner" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- Sample chips — swapped by JS per mode -->
                 <div class="sample-section">
-                    <p class="sample-label">Contoh klaim</p>
-                    <div class="sample-chips-row">
+                    <p class="sample-label" id="sample-label">Contoh klaim</p>
+                    <div class="sample-chips-row" id="sample-chips">
                         <a href="#" class="sample-claim">Jokowi lahir 17 Agustus 1945.</a>
                         <a href="#" class="sample-claim">Barack Obama lahir di Hawaii.</a>
                         <a href="#" class="sample-claim">Albert Einstein menerima Nobel Fisika pada 1921.</a>
@@ -167,20 +245,23 @@
             </div>
         </div>
 
-        <!-- ── Result ────────────────────────────────── -->
+        <!-- ── Result ────────────────────────────────────── -->
         <div id="result-container" class="result-page hidden">
 
             <!-- Query bar -->
             <div class="query-bar">
                 <div class="query-bar-inner">
-                    <h2 id="query-display" class="query-display"></h2>
+                    <div class="query-bar-left">
+                        <span id="result-mode-badge" class="result-mode-badge"></span>
+                        <h2 id="query-display" class="query-display"></h2>
+                    </div>
                     <div class="query-bar-actions">
                         <button id="btn-share" class="icon-btn" aria-label="Salin tautan hasil">
                             <i class="ph ph-link" id="share-icon" aria-hidden="true"></i>
                         </button>
                         <button id="btn-new-search" class="btn-new-search">
                             <i class="ph ph-plus" aria-hidden="true"></i>
-                            Klaim baru
+                            Baru
                         </button>
                     </div>
                 </div>
@@ -196,7 +277,7 @@
                     <div id="loading-state" class="loading-plex hidden" aria-live="polite">
                         <div class="load-header">
                             <span class="loader-pulse" aria-hidden="true"></span>
-                            <span>Menjalankan retrieval dan inferensi...</span>
+                            <span id="loading-label">Menjalankan retrieval dan inferensi...</span>
                         </div>
                         <div class="skeleton-strip">
                             <div class="skeleton-source"></div>
@@ -221,9 +302,8 @@
                         </div>
                     </div>
 
-                    <!-- Answer -->
+                    <!-- ── Fact-check result ── -->
                     <div id="result-state" class="answer-zone hidden">
-
                         <div id="evidence-container" class="sources-strip"></div>
 
                         <div id="verdict-container" class="verdict-panel">
@@ -259,8 +339,37 @@
                             <span class="perf-chip">LLM <strong id="llm-time">-</strong></span>
                             <span class="perf-chip">Total <strong id="total-time">-</strong></span>
                         </footer>
-
                     </div>
+
+                    <!-- ── QA result ── -->
+                    <div id="qa-result-state" class="answer-zone hidden">
+                        <div id="qa-evidence-container" class="sources-strip"></div>
+
+                        <div class="qa-answer-card">
+                            <div class="qa-answer-header">
+                                <i class="ph ph-sparkle" aria-hidden="true"></i>
+                                <span>Jawaban</span>
+                            </div>
+                            <div id="qa-answer-text" class="qa-answer-body"></div>
+                        </div>
+
+                        <footer class="perf-row">
+                            <span class="perf-chip">Retrieval <strong id="qa-retrieval-time">-</strong></span>
+                            <span class="perf-chip">LLM <strong id="qa-llm-time">-</strong></span>
+                            <span class="perf-chip">Total <strong id="qa-total-time">-</strong></span>
+                        </footer>
+                    </div>
+
+                    <!-- ── Scan result (URL / Image) ── -->
+                    <div id="scan-result-state" class="answer-zone hidden">
+                        <div id="scan-article-card" class="scan-article-card"></div>
+                        <div id="scan-claims-list" class="scan-claims-list"></div>
+                        <footer class="perf-row">
+                            <span class="perf-chip">Total <strong id="scan-total-time">-</strong></span>
+                            <span class="perf-chip"><strong id="scan-claims-count">0</strong> klaim diperiksa</span>
+                        </footer>
+                    </div>
+
                 </main>
 
                 <!-- Result sidebar — mode selector only -->

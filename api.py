@@ -9,16 +9,30 @@ import os
 import json
 import time
 import re
+import base64
+import asyncio
 import unicodedata
 import torch
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional
 from sentence_transformers import SentenceTransformer
 import chromadb
 from groq import Groq
+
+try:
+    from playwright.async_api import async_playwright
+    PLAYWRIGHT_AVAILABLE = True
+except ImportError:
+    PLAYWRIGHT_AVAILABLE = False
+
+try:
+    import trafilatura
+    TRAFILATURA_AVAILABLE = True
+except ImportError:
+    TRAFILATURA_AVAILABLE = False
 
 load_dotenv()
 
@@ -28,7 +42,8 @@ load_dotenv()
 CHROMA_DIR  = "data/chroma"
 COLLECTION  = "biographies"
 EMBED_MODEL = "paraphrase-multilingual-MiniLM-L12-v2"
-GROQ_MODEL  = "llama-3.3-70b-versatile"
+GROQ_MODEL        = "llama-3.3-70b-versatile"
+GROQ_VISION_MODEL = "meta-llama/llama-4-scout-17b-16e-instruct"
 TOP_K       = 5
 MIN_SCORE   = 0.25  # threshold minimum similarity — di bawah ini dianggap tidak relevan
 RETRIEVAL_POOL = 50
@@ -125,9 +140,60 @@ class FactCheckResponse(BaseModel):
     waktu_retrieval_ms: float
     waktu_llm_ms: float
 
+class QARequest(BaseModel):
+    pertanyaan: str
+    top_k: int = TOP_K
+
+class SourceItem(BaseModel):
+    judul: str
+    seksi: str
+    url: str
+    bahasa: str
+    skor: float
+    kutipan: str
+
+class QAResponse(BaseModel):
+    pertanyaan: str
+    jawaban: str
+    sumber: list[SourceItem]
+    model: str
+    waktu_retrieval_ms: float
+    waktu_llm_ms: float
+
+class KlaimResult(BaseModel):
+    klaim: str
+    verdict: str
+    kepercayaan: float
+    penjelasan: str
+    bukti: list[EvidenceItem]
+
+class ScanURLRequest(BaseModel):
+    url: str
+    strategi: str = "cot"
+
+class ScanURLResponse(BaseModel):
+    url: str
+    judul_artikel: str
+    ringkasan_artikel: str
+    klaim_ditemukan: list[str]
+    hasil: list[KlaimResult]
+    waktu_total_ms: float
+
+class ImageScanResponse(BaseModel):
+    teks_diekstrak: str
+    klaim_ditemukan: list[str]
+    hasil: list[KlaimResult]
+    waktu_total_ms: float
+
 # ─────────────────────────────────────────────
 # Prompts
 # ─────────────────────────────────────────────
+QA_SYSTEM_PROMPT = """Kamu adalah asisten tanya-jawab yang ahli tentang tokoh, sejarah, dan politik Indonesia.
+Gunakan HANYA informasi dari konteks yang diberikan. Jika informasi tidak tersedia di konteks, nyatakan secara eksplisit bahwa kamu tidak memiliki informasi tersebut.
+Jawab dalam Bahasa Indonesia secara informatif. Jika relevan, sertakan referensi sumber dengan format [1], [2], dst."""
+
+EXTRACT_CLAIMS_SYSTEM = """Kamu adalah asisten ekstraksi fakta. Tugasmu mengidentifikasi klaim faktual spesifik yang dapat diverifikasi dari sebuah teks."""
+
 SYSTEM_PROMPT = """Kamu adalah asisten pengecekan fakta yang teliti untuk informasi biografi tokoh.
 Tugasmu adalah memverifikasi klaim menggunakan HANYA bukti yang diberikan. JANGAN gunakan pengetahuan sebelumnya.
 Selalu jawab dalam Bahasa Indonesia.
@@ -136,6 +202,31 @@ Pilihan verdict:
 - DIDUKUNG: Bukti dengan jelas mendukung klaim
 - DIBANTAH: Bukti dengan jelas membantah klaim
 - INFO_TIDAK_CUKUP: Bukti tidak cukup untuk memverifikasi klaim"""
+
+def build_qa_prompt(pertanyaan: str, evidence: list[dict]) -> str:
+    ev_block = "\n\n".join(
+        f"[{i+1}] {e['title']} — {e['section']}\n{e['text']}"
+        for i, e in enumerate(evidence)
+    )
+    return f"""PERTANYAAN: {pertanyaan}
+
+KONTEKS:
+{ev_block}
+
+Berikan jawaban komprehensif berdasarkan konteks di atas. Sertakan fakta-fakta penting dan sebutkan sumbernya dengan [1], [2], dst. jika perlu."""
+
+
+def build_extract_claims_prompt(teks: str) -> str:
+    return f"""Dari teks berikut, ekstrak 3-5 klaim faktual yang paling spesifik dan dapat diverifikasi.
+Fokus pada: nama orang/jabatan, tanggal/tahun, lokasi, angka, peristiwa spesifik.
+Setiap klaim harus berdiri sendiri tanpa konteks tambahan.
+
+TEKS:
+{teks[:3000]}
+
+Jawab HANYA dengan JSON array tanpa penjelasan lain:
+["klaim 1", "klaim 2", "klaim 3"]"""
+
 
 def build_prompt(klaim: str, evidence: list[dict], strategi: str) -> str:
     ev_block = "\n\n".join(
@@ -588,6 +679,102 @@ def parse_response(text: str, strategi: str) -> dict:
     }
 
 # ─────────────────────────────────────────────
+# Core helpers (reusable across endpoints)
+# ─────────────────────────────────────────────
+def run_fact_check(klaim: str, top_k: int = TOP_K, strategi: str = "cot") -> dict:
+    t0 = time.perf_counter()
+    query_vec = model.encode([klaim], normalize_embeddings=True, device=device).tolist()
+    evidence = retrieve_evidence(klaim, query_vec, top_k)
+    retrieval_ms = (time.perf_counter() - t0) * 1000
+
+    if not evidence:
+        return {
+            "klaim": klaim, "verdict": "INFO_TIDAK_CUKUP", "kepercayaan": 0.0,
+            "penjelasan": "Tidak ada bukti relevan yang ditemukan dalam basis data.",
+            "penalaran": "", "bukti": [],
+            "model": GROQ_MODEL,
+            "waktu_retrieval_ms": round(retrieval_ms, 2), "waktu_llm_ms": 0.0,
+        }
+
+    prompt = build_prompt(klaim, evidence, strategi)
+    t1 = time.perf_counter()
+    resp = groq_client.chat.completions.create(
+        model=GROQ_MODEL,
+        messages=[{"role": "system", "content": SYSTEM_PROMPT}, {"role": "user", "content": prompt}],
+        temperature=0.1,
+        max_tokens=1024,
+    )
+    llm_ms = (time.perf_counter() - t1) * 1000
+    parsed = parse_response(resp.choices[0].message.content, strategi)
+
+    return {
+        "klaim": klaim, "verdict": parsed["verdict"], "kepercayaan": parsed["kepercayaan"],
+        "penjelasan": parsed["penjelasan"], "penalaran": parsed["penalaran"],
+        "bukti": evidence, "model": GROQ_MODEL,
+        "waktu_retrieval_ms": round(retrieval_ms, 2), "waktu_llm_ms": round(llm_ms, 2),
+    }
+
+
+async def scrape_article(url: str) -> tuple[str, str]:
+    """Scrape URL using Playwright (JS-rendered) + trafilatura (article extraction).
+    Returns (title, text). Falls back to httpx if Playwright not installed."""
+    html = ""
+
+    if PLAYWRIGHT_AVAILABLE:
+        async with async_playwright() as p:
+            browser = await p.chromium.launch(headless=True)
+            context = await browser.new_context(
+                user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+            )
+            page = await context.new_page()
+            try:
+                await page.goto(url, wait_until="networkidle", timeout=30000)
+                html = await page.content()
+            except Exception as e:
+                await browser.close()
+                raise HTTPException(422, f"Gagal membuka URL: {e}")
+            await browser.close()
+    else:
+        try:
+            import httpx
+            async with httpx.AsyncClient(timeout=20, follow_redirects=True) as client:
+                r = await client.get(url, headers={"User-Agent": "Mozilla/5.0"})
+                html = r.text
+        except Exception as e:
+            raise HTTPException(422, f"Gagal fetch URL (Playwright tidak terinstal): {e}")
+
+    if not TRAFILATURA_AVAILABLE:
+        raise HTTPException(500, "trafilatura tidak terinstal. Jalankan: pip install trafilatura")
+
+    metadata = trafilatura.extract_metadata(html)
+    text = trafilatura.extract(html, include_comments=False, include_tables=False, favor_precision=True)
+    title = (metadata.title if metadata and metadata.title else None) or url
+
+    return title, text or ""
+
+
+def extract_claims_from_text(teks: str) -> list[str]:
+    resp = groq_client.chat.completions.create(
+        model=GROQ_MODEL,
+        messages=[
+            {"role": "system", "content": EXTRACT_CLAIMS_SYSTEM},
+            {"role": "user", "content": build_extract_claims_prompt(teks)},
+        ],
+        temperature=0.1,
+        max_tokens=512,
+    )
+    raw = resp.choices[0].message.content.strip()
+    try:
+        clean = re.sub(r"```(?:json)?", "", raw).strip()
+        claims = json.loads(clean)
+        if isinstance(claims, list):
+            return [str(c) for c in claims if c][:5]
+    except Exception:
+        pass
+    return [teks[:300]]
+
+
+# ─────────────────────────────────────────────
 # Routes
 # ─────────────────────────────────────────────
 @app.get("/")
@@ -620,68 +807,160 @@ def cek_fakta(req: FactCheckRequest):
     if collection.count() == 0:
         raise HTTPException(400, "ChromaDB kosong")
 
-    # Embed klaim pakai GPU
-    t0        = time.perf_counter()
-    query_vec = model.encode(
-        [req.klaim],
-        normalize_embeddings=True,
-        device=device,
-    ).tolist()
+    result = run_fact_check(req.klaim, req.top_k, req.strategi)
+    return FactCheckResponse(
+        klaim              = result["klaim"],
+        verdict            = result["verdict"],
+        kepercayaan        = result["kepercayaan"],
+        penjelasan         = result["penjelasan"],
+        penalaran          = result["penalaran"],
+        bukti              = [EvidenceItem(teks=e["text"], judul=e["title"], seksi=e["section"],
+                                           url=e["url"], bahasa=e["lang"], skor=e["score"])
+                              for e in result["bukti"]],
+        model              = result["model"],
+        waktu_retrieval_ms = result["waktu_retrieval_ms"],
+        waktu_llm_ms       = result["waktu_llm_ms"],
+    )
 
-    evidence = retrieve_evidence(req.klaim, query_vec, req.top_k)
+
+@app.post("/qa", response_model=QAResponse)
+def tanya_jawab(req: QARequest):
+    """Mode QA: jawab pertanyaan bebas menggunakan RAG, output teks + sumber (bukan verdict)."""
+    if collection.count() == 0:
+        raise HTTPException(400, "ChromaDB kosong")
+
+    t0 = time.perf_counter()
+    query_vec = model.encode([req.pertanyaan], normalize_embeddings=True, device=device).tolist()
+    evidence = retrieve_evidence(req.pertanyaan, query_vec, req.top_k)
     retrieval_ms = (time.perf_counter() - t0) * 1000
 
     if not evidence:
-        return FactCheckResponse(
-            klaim=req.klaim,
-            verdict="INFO_TIDAK_CUKUP",
-            kepercayaan=0.0,
-            penjelasan="Tidak ada bukti relevan yang ditemukan dalam basis data.",
-            penalaran="",
-            bukti=[],
-            model=GROQ_MODEL,
-            waktu_retrieval_ms=round(retrieval_ms, 2),
-            waktu_llm_ms=0.0,
+        return QAResponse(
+            pertanyaan=req.pertanyaan,
+            jawaban="Maaf, tidak ditemukan informasi yang relevan di basis data untuk menjawab pertanyaan ini.",
+            sumber=[], model=GROQ_MODEL,
+            waktu_retrieval_ms=round(retrieval_ms, 2), waktu_llm_ms=0.0,
         )
 
-    # LLM
-    prompt = build_prompt(req.klaim, evidence, req.strategi)
-    t1     = time.perf_counter()
-    resp   = groq_client.chat.completions.create(
+    prompt = build_qa_prompt(req.pertanyaan, evidence)
+    t1 = time.perf_counter()
+    resp = groq_client.chat.completions.create(
         model=GROQ_MODEL,
-        messages=[
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user",   "content": prompt},
-        ],
-        temperature=0.1,
+        messages=[{"role": "system", "content": QA_SYSTEM_PROMPT}, {"role": "user", "content": prompt}],
+        temperature=0.3,
         max_tokens=1024,
     )
     llm_ms = (time.perf_counter() - t1) * 1000
-    raw    = resp.choices[0].message.content
-    parsed = parse_response(raw, req.strategi)
+    jawaban = resp.choices[0].message.content.strip()
 
-    bukti_items = [
-        EvidenceItem(
-            teks   = e["text"],
-            judul  = e["title"],
-            seksi  = e["section"],
-            url    = e["url"],
-            bahasa = e["lang"],
-            skor   = e["score"],
+    sumber_items = [
+        SourceItem(
+            judul   = e["title"],
+            seksi   = e["section"],
+            url     = e["url"],
+            bahasa  = e["lang"],
+            skor    = e["score"],
+            kutipan = e["text"][:200] + ("..." if len(e["text"]) > 200 else ""),
         )
         for e in evidence
     ]
 
-    return FactCheckResponse(
-        klaim             = req.klaim,
-        verdict           = parsed["verdict"],
-        kepercayaan       = parsed["kepercayaan"],
-        penjelasan        = parsed["penjelasan"],
-        penalaran         = parsed["penalaran"],
-        bukti             = bukti_items,
-        model             = GROQ_MODEL,
-        waktu_retrieval_ms= round(retrieval_ms, 2),
-        waktu_llm_ms      = round(llm_ms, 2),
+    return QAResponse(
+        pertanyaan         = req.pertanyaan,
+        jawaban            = jawaban,
+        sumber             = sumber_items,
+        model              = GROQ_MODEL,
+        waktu_retrieval_ms = round(retrieval_ms, 2),
+        waktu_llm_ms       = round(llm_ms, 2),
+    )
+
+
+@app.post("/qa-image", response_model=ImageScanResponse)
+async def qa_image(file: UploadFile = File(...)):
+    """Upload screenshot/foto → ekstrak teks via vision LLM → fact-check klaim yang ditemukan."""
+    allowed = {"image/jpeg", "image/png", "image/webp", "image/gif"}
+    if file.content_type not in allowed:
+        raise HTTPException(400, f"Tipe file tidak didukung: {file.content_type}. Gunakan JPEG/PNG/WebP.")
+
+    t0 = time.perf_counter()
+    image_data = await file.read()
+    b64_image = base64.b64encode(image_data).decode()
+    mime_type = file.content_type
+
+    vision_resp = groq_client.chat.completions.create(
+        model=GROQ_VISION_MODEL,
+        messages=[{
+            "role": "user",
+            "content": [
+                {"type": "image_url", "image_url": {"url": f"data:{mime_type};base64,{b64_image}"}},
+                {"type": "text", "text": "Ekstrak semua teks dari gambar ini secara lengkap dan akurat. Jika ada berita atau artikel, tulis teks utamanya."},
+            ],
+        }],
+        max_tokens=2048,
+    )
+    extracted_text = vision_resp.choices[0].message.content.strip()
+
+    if not extracted_text or len(extracted_text) < 20:
+        raise HTTPException(422, "Tidak dapat mengekstrak teks dari gambar. Pastikan gambar mengandung teks yang jelas.")
+
+    claims = extract_claims_from_text(extracted_text)
+
+    results = []
+    for klaim in claims:
+        r = run_fact_check(klaim, TOP_K, "cot")
+        results.append(KlaimResult(
+            klaim       = r["klaim"],
+            verdict     = r["verdict"],
+            kepercayaan = r["kepercayaan"],
+            penjelasan  = r["penjelasan"],
+            bukti       = [EvidenceItem(teks=e["text"], judul=e["title"], seksi=e["section"],
+                                        url=e["url"], bahasa=e["lang"], skor=e["score"])
+                           for e in r["bukti"]],
+        ))
+
+    return ImageScanResponse(
+        teks_diekstrak   = extracted_text,
+        klaim_ditemukan  = claims,
+        hasil            = results,
+        waktu_total_ms   = round((time.perf_counter() - t0) * 1000, 2),
+    )
+
+
+@app.post("/scan-url", response_model=ScanURLResponse)
+async def scan_url(req: ScanURLRequest):
+    """Scrape URL artikel berita → ekstrak klaim faktual → batch RAG fact-check."""
+    if not req.url.startswith(("http://", "https://")):
+        raise HTTPException(400, "URL harus dimulai dengan http:// atau https://")
+
+    t0 = time.perf_counter()
+    judul, teks = await scrape_article(req.url)
+
+    if not teks or len(teks) < 100:
+        raise HTTPException(422, "Tidak dapat mengekstrak konten artikel. Coba URL artikel berita lain.")
+
+    ringkasan = teks[:500] + ("..." if len(teks) > 500 else "")
+    claims = extract_claims_from_text(teks)
+
+    results = []
+    for klaim in claims:
+        r = run_fact_check(klaim, TOP_K, req.strategi)
+        results.append(KlaimResult(
+            klaim       = r["klaim"],
+            verdict     = r["verdict"],
+            kepercayaan = r["kepercayaan"],
+            penjelasan  = r["penjelasan"],
+            bukti       = [EvidenceItem(teks=e["text"], judul=e["title"], seksi=e["section"],
+                                        url=e["url"], bahasa=e["lang"], skor=e["score"])
+                           for e in r["bukti"]],
+        ))
+
+    return ScanURLResponse(
+        url              = req.url,
+        judul_artikel    = judul,
+        ringkasan_artikel= ringkasan,
+        klaim_ditemukan  = claims,
+        hasil            = results,
+        waktu_total_ms   = round((time.perf_counter() - t0) * 1000, 2),
     )
 
 
