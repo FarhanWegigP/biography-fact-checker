@@ -25,3 +25,17 @@ __pycache__/
 # OS
 .DS_Store
 Thumbs.db
+
+# Markdown files - kecuali yang penting
+*.md
+!PLAN.md
+!README.md
+!RAG_IMPROVEMENT_REPORT.md
+
+# Folder detil tugas
+detil tugas/
+
+# Screenshot/image files di root
+*.png
+*.jpg
+*.jpeg
