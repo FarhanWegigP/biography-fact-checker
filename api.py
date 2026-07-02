@@ -6,11 +6,15 @@ Jalanin:
 """
 
 import os
+import sys
 import json
 import time
 import re
 import base64
 import asyncio
+
+if sys.platform == "win32":
+    asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
 import unicodedata
 import torch
 from dotenv import load_dotenv
@@ -715,12 +719,11 @@ def run_fact_check(klaim: str, top_k: int = TOP_K, strategi: str = "cot") -> dic
     }
 
 
-async def scrape_article(url: str) -> tuple[str, str]:
-    """Scrape URL using Playwright (JS-rendered) + trafilatura (article extraction).
-    Returns (title, text). Falls back to httpx if Playwright not installed."""
-    html = ""
+def _playwright_fetch_sync(url: str) -> str:
+    """Run Playwright in a thread with its own ProactorEventLoop (Windows fix)."""
+    import asyncio as _asyncio
 
-    if PLAYWRIGHT_AVAILABLE:
+    async def _fetch():
         async with async_playwright() as p:
             browser = await p.chromium.launch(headless=True)
             context = await browser.new_context(
@@ -732,8 +735,32 @@ async def scrape_article(url: str) -> tuple[str, str]:
                 html = await page.content()
             except Exception as e:
                 await browser.close()
-                raise HTTPException(422, f"Gagal membuka URL: {e}")
+                raise RuntimeError(f"Gagal membuka URL: {e}")
             await browser.close()
+            return html
+
+    loop = _asyncio.ProactorEventLoop()
+    try:
+        return loop.run_until_complete(_fetch())
+    finally:
+        loop.close()
+
+
+async def scrape_article(url: str) -> tuple[str, str]:
+    """Scrape URL using Playwright (JS-rendered) + trafilatura (article extraction).
+    Returns (title, text). Falls back to httpx if Playwright not installed."""
+    html = ""
+
+    if PLAYWRIGHT_AVAILABLE:
+        import concurrent.futures
+        try:
+            loop = asyncio.get_event_loop()
+            with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
+                html = await loop.run_in_executor(pool, _playwright_fetch_sync, url)
+        except RuntimeError as e:
+            raise HTTPException(422, str(e))
+        except Exception as e:
+            raise HTTPException(422, f"Gagal membuka URL: {e}")
     else:
         try:
             import httpx
@@ -751,6 +778,40 @@ async def scrape_article(url: str) -> tuple[str, str]:
     title = (metadata.title if metadata and metadata.title else None) or url
 
     return title, text or ""
+
+
+def expand_query_entities(pertanyaan: str) -> list[str]:
+    """Tebak nama tokoh yang relevan dari pertanyaan untuk memperbaiki retrieval."""
+    try:
+        resp = groq_client.chat.completions.create(
+            model=GROQ_MODEL,
+            messages=[
+                {
+                    "role": "system",
+                    "content": "Kamu adalah asisten ekstraksi entitas. Identifikasi nama tokoh yang paling mungkin menjadi jawaban atau topik dari pertanyaan.",
+                },
+                {
+                    "role": "user",
+                    "content": (
+                        f"Dari pertanyaan ini, sebutkan nama tokoh yang paling relevan.\n"
+                        f"Jika pertanyaan mendeskripsikan peran/jabatan (contoh: 'siapa presiden pertama'), tebak siapa orangnya.\n"
+                        f"Jika tidak ada tokoh yang relevan, kembalikan array kosong.\n\n"
+                        f"Pertanyaan: {pertanyaan}\n\n"
+                        f"Jawab HANYA dengan JSON array: [\"Nama Tokoh\"]"
+                    ),
+                },
+            ],
+            temperature=0.1,
+            max_tokens=100,
+        )
+        raw = resp.choices[0].message.content.strip()
+        clean = re.sub(r"```(?:json)?", "", raw).strip()
+        names = json.loads(clean)
+        if isinstance(names, list):
+            return [str(n) for n in names if n and len(str(n)) > 2]
+    except Exception:
+        pass
+    return []
 
 
 def extract_claims_from_text(teks: str) -> list[str]:
@@ -831,7 +892,15 @@ def tanya_jawab(req: QARequest):
 
     t0 = time.perf_counter()
     query_vec = model.encode([req.pertanyaan], normalize_embeddings=True, device=device).tolist()
-    evidence = retrieve_evidence(req.pertanyaan, query_vec, req.top_k)
+
+    ensure_search_indexes()
+    retrieval_query = req.pertanyaan
+    if not resolve_title_candidates(req.pertanyaan):
+        expanded = expand_query_entities(req.pertanyaan)
+        if expanded:
+            retrieval_query = req.pertanyaan + " " + " ".join(expanded)
+
+    evidence = retrieve_evidence(retrieval_query, query_vec, req.top_k)
     retrieval_ms = (time.perf_counter() - t0) * 1000
 
     if not evidence:

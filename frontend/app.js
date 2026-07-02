@@ -1,7 +1,7 @@
 // ==========================================================================
 // CONFIGURATION
 // ==========================================================================
-const API_BASE_URL  = "http://localhost:8001";
+const API_BASE_URL  = "http://localhost:8099";
 const HISTORY_KEY   = "bfc-history";
 const HISTORY_MAX   = 30;
 const SIDEBAR_KEY   = "bfc-sidebar";
@@ -112,12 +112,14 @@ const llmTime               = document.getElementById("llm-time");
 const totalTime             = document.getElementById("total-time");
 
 // DOM — QA result
-const qaResultState    = document.getElementById("qa-result-state");
-const qaEvidenceContainer = document.getElementById("qa-evidence-container");
-const qaAnswerText     = document.getElementById("qa-answer-text");
-const qaRetrievalTime  = document.getElementById("qa-retrieval-time");
-const qaLlmTime        = document.getElementById("qa-llm-time");
-const qaTotalTime      = document.getElementById("qa-total-time");
+const qaResultState           = document.getElementById("qa-result-state");
+const qaEvidenceContainer     = document.getElementById("qa-evidence-container");
+const qaAnswerText            = document.getElementById("qa-answer-text");
+const qaRetrievalTime         = document.getElementById("qa-retrieval-time");
+const qaLlmTime               = document.getElementById("qa-llm-time");
+const qaTotalTime             = document.getElementById("qa-total-time");
+const qaBuktiDetails          = document.getElementById("qa-bukti-details");
+const qaFullEvidenceContainer = document.getElementById("qa-full-evidence-container");
 
 // DOM — Scan result
 const scanResultState  = document.getElementById("scan-result-state");
@@ -761,8 +763,35 @@ function renderQAResult(data) {
                 </a>
             `;
         }).join("");
+
+        qaFullEvidenceContainer.innerHTML = data.sumber.map((s, i) => {
+            const highlighted  = highlightKeywords(s.kutipan, data.pertanyaan);
+            const scorePercent = Math.round(s.skor * 100);
+            return `
+                <article class="evidence-card">
+                    <div class="evidence-head">
+                        <div class="ev-source">
+                            <i class="ph ph-globe" aria-hidden="true"></i>
+                            <span class="ev-title">${escapeHtml(s.judul)}</span>
+                            <span class="ev-section">${escapeHtml(s.seksi)}</span>
+                        </div>
+                        <span class="ev-score">${scorePercent}%</span>
+                    </div>
+                    <p class="ev-text">"${highlighted}"</p>
+                    <div class="ev-foot">
+                        <a href="${escapeAttribute(s.url)}" target="_blank" rel="noreferrer" class="ev-link">
+                            Buka Wikipedia <i class="ph ph-arrow-square-out" aria-hidden="true"></i>
+                        </a>
+                        <span class="ev-lang">${escapeHtml(s.bahasa)}</span>
+                    </div>
+                </article>
+            `;
+        }).join("");
+        qaBuktiDetails.removeAttribute("hidden");
     } else {
         qaEvidenceContainer.innerHTML = `<div class="no-sources">Tidak ada sumber relevan ditemukan.</div>`;
+        qaFullEvidenceContainer.innerHTML = "";
+        qaBuktiDetails.setAttribute("hidden", "");
     }
 
     qaAnswerText.textContent = data.jawaban || "Tidak ada jawaban yang dihasilkan.";

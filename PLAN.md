@@ -187,13 +187,71 @@ Lebih sulit — output adalah teks bebas, tidak ada label pasti.
 
 ---
 
+## Fase 6 — Browser Extension (Planned)
+
+> Dikerjakan setelah Fase 1 selesai. Backend tidak perlu diubah — extension hanya UI tambahan.
+
+### Konsep
+Extension browser yang bisa dipakai langsung saat browsing Twitter/berita, tanpa buka tab baru.
+Backend tetap jalan lokal (`localhost:8000`). Extension hanya jembatan antara halaman web dan backend.
+
+### Cara Install (Developer Mode — tidak perlu publish ke store)
+1. User buka `chrome://extensions`
+2. Aktifkan "Developer Mode"
+3. Klik "Load unpacked" → pilih folder `extension/`
+4. Extension aktif langsung
+
+### Flow Pemakaian
+
+**Cara 1 — Klik kanan (prioritas pertama):**
+- User highlight teks tweet/artikel
+- Klik kanan → menu konteks: **"Cek Fakta dengan RAG"**
+- Sidebar muncul di kanan layar dengan hasil verdict + sources
+
+**Cara 2 — Floating button:**
+- User highlight teks
+- Muncul tombol kecil "🔍 Cek" di dekat seleksi
+- Klik → sidebar terbuka dengan hasil
+
+**Cara 3 — Screenshot area:**
+- Klik icon extension di toolbar browser
+- Klik "Capture Area"
+- Cursor jadi crosshair → drag area yang mau dicek
+- Screenshot dikirim ke endpoint vision backend → ekstrak teks → RAG
+
+### Struktur File Extension
+```
+extension/
+├── manifest.json       ← config extension (permissions, scripts)
+├── content_script.js   ← inject ke halaman, handle text selection
+├── background.js       ← service worker, handle context menu
+├── sidebar.html        ← UI hasil fact-check
+├── sidebar.css
+└── icons/
+    └── icon128.png
+```
+
+### Backend Endpoint yang Dipakai
+- `POST /check` — sudah ada, untuk teks (Cara 1 & 2)
+- `POST /check-image` — sudah ada, untuk screenshot (Cara 3)
+- CORS sudah diset di `api.py` — tinggal tambah `chrome-extension://*`
+
+### Checklist
+- [ ] `manifest.json` dengan permissions: `contextMenus`, `activeTab`, `scripting`
+- [ ] Context menu "Cek Fakta dengan RAG" (Cara 1)
+- [ ] Sidebar HTML/CSS untuk tampilkan hasil
+- [ ] Floating button saat text selection (Cara 2)
+- [ ] Screenshot area + kirim ke vision endpoint (Cara 3)
+- [ ] CORS backend update untuk allow extension origin
+
+---
+
 ## Ide Agak Gila Tio (Belum Direncanakan — Brainstorm Saja)
 
 > Jangan dikerjakan sekarang. Ini ide yang mungkin terlalu ambisius tapi menarik.
 
 - **Scan URL Berita** — user paste link artikel berita → sistem scrape teks → ekstrak klaim otomatis via LLM → batch RAG fact-check per klaim → tampilkan laporan hoax/faktual per klaim. Berguna banget secara use case nyata.
 - **Input Gambar / Screenshot** — user upload foto screenshot tweet/WA/berita → OCR atau vision LLM ekstrak teks → masuk ke pipeline fact-check seperti biasa. Cocok untuk cek konten viral.
-- **Highlight & Check** — ekstensi browser atau bookmarklet: select teks di halaman mana saja → klik → langsung masuk ke sistem
 - **RAG atas RAG** — sistem bisa membandingkan 2 klaim yang bertentangan dan kasih analisis mana yang lebih didukung data
 
 ---

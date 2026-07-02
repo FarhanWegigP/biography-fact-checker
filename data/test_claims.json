@@ -1,0 +1,482 @@
+[
+  {
+    "id": 1,
+    "klaim": "Guilherme \"Bill\" Cardoso lahir pada April 27, 1976.",
+    "expected_verdict": "DIDUKUNG",
+    "reference": "Guilherme \"Bill\" Cardoso (born April 27, 1976) is a Brazilian-American entrepreneur, engineer, and scientist. Cardoso is the founder of Creative Electron, Inc., an X-ray inspection systems manufacturer, and Scorpion-EV Inc., an electric vehicle manufacturer. He has over 25 years of experience driving technological breakthroughs in radiation detection, electronics, and high-performance electric vehicles. \nCardoso won the Best Engineered Vehicle of the Year at the 2023 SEMA show for his '23 Cobra Venom conversion kit build."
+  },
+  {
+    "id": 2,
+    "klaim": "Jason Calacanis lahir pada November 28, 1960.",
+    "expected_verdict": "DIBANTAH",
+    "reference": "Jason McCabe Calacanis (born November 28, 1970) is an American podcaster, Internet entrepreneur, angel investor, and author.\nHis first company was part of the dot-com era in New York. His second venture, Weblogs, Inc., a publishing company that he co-founded together with Brian Alvey, capitalized on the growth of blogs before being sold to AOL. Calacanis is also an angel investor in various technology startups and co-host of the All-In podcast alongside David Sacks, Chamath Palihapitiya and David Friedberg, and the host of This Week in Startups podcast."
+  },
+  {
+    "id": 3,
+    "klaim": "Bill Lee (author) fasih berbicara dalam lima bahasa asing.",
+    "expected_verdict": "INFO_TIDAK_CUKUP",
+    "reference": "William Lee (born October 8, 1954) is an American writer. He is the author of three books. He is a former member of the San Francisco Chinatown gang that was responsible for the 1977 Golden Dragon massacre."
+  },
+  {
+    "id": 4,
+    "klaim": "Ellen Johnson Sirleaf lahir pada 29 October 1938.",
+    "expected_verdict": "DIDUKUNG",
+    "reference": "Ellen Eugenia Johnson Sirleaf (born 29 October 1938) is a Liberian politician who served as the 24th president of Liberia from 2006 to 2018. Sirleaf was the first elected female head of state in Africa.\nSirleaf was born in Monrovia to a Gola father and Kru-German mother. She was educated at the College of West Africa. Sirleaf is a Harvard-trained economist.She completed her education in the United States, where she studied at Madison Business College, the University of Colorado Boulder, and Harvard University. She returned to Liberia to work in William Tolbert's government as Deputy Minister of Finance from 1973 to 1974. Later, she worked again in the West, for the World Bank in the Caribbean and Latin America. In 1979, she received a cabinet appointment as Minister of Finance, serving to 1980.\nAfter Samuel Doe seized power in 1980 in a coup d'état and executed Tolbert, Sirleaf fled to the United States. She worked for Citibank and then the Equator Bank. She returned to Liberia to contest a senatorial seat for Montserrado County in 1985, an election that was disputed. She was arrested as a result of her open criticism of the military government in 1985 and was sentenced to ten years imprisonment, although she was later released. Sirleaf continued to be involved in politics. She finished in second place at the 1997 presidential election, which was won by Charles Taylor.\nShe won the 2005 presidential election and took office on 16 January 2006. She was re-elected in 2011. She was the first woman in Africa elected as president of her country. She won the Nobel Peace Prize in 2011, in recognition of her efforts to bring women into the peacekeeping process. She has received numerous other awards for her leadership. In June 2016, Sirleaf was elected as the Chair of the Economic Community of West African States, making her the first woman to hold the position since it was created."
+  },
+  {
+    "id": 5,
+    "klaim": "Michael Jay Solomon lahir pada January 20, 1928.",
+    "expected_verdict": "DIBANTAH",
+    "reference": "Michael Jay Solomon (born January 20, 1938) is an American businessman, and entertainment executive. Solomon's career spans more than 55 years in the media and content distribution business. He is the founder, chairman and president of several publicly and privately held companies. Solomon has founded or sits on the board of philanthropic organizations benefiting education, public health, and the arts."
+  },
+  {
+    "id": 6,
+    "klaim": "Bill Gates memiliki peliharaan seekor anjing bernama Max.",
+    "expected_verdict": "INFO_TIDAK_CUKUP",
+    "reference": "William Henry Gates III (born October 28, 1955) is an American businessman and philanthropist. A pioneer of the microcomputer revolution of the 1970s and 1980s, he co-founded the software company Microsoft in 1975 with his childhood friend Paul Allen. Following Microsoft's initial public offering in 1986 and the subsequent increase in its stock price, Gates became the world's then-youngest billionaire in 1987, at age 31. Forbes magazine ranked him as the world's wealthiest person for 18 out of 24 years between 1995 and 2017, including 13 years consecutively from 1995 to 2007. Gates became the first centibillionaire in 1999, when his net worth briefly surpassed US$100 billion. According to Forbes, as of February 2026, his net worth stood at US$107.7 billion, making him the 18th-wealthiest individual in the world.\nBorn and raised in Seattle, Washington, Gates was privately educated at Lakeside School, where he befriended Allen and developed his computing interests. In 1973, he enrolled at Harvard University, where he took classes including Math 55 and graduate-level computer science courses, but he dropped out in 1975 to co-found and lead Microsoft. He served as its CEO for the next 25 years and also became president and chairman of the board when the company was incorporated in 1981. Succeeded as CEO by Steve Ballmer in 2000, he transitioned to chief software architect, a position he held until 2008. He stepped down as chairman of the board in 2014 and became technology adviser to CEO Satya Nadella and other Microsoft leaders, a position he still holds. He resigned from the board in 2020.\nOver time, Gates reduced his role at Microsoft to focus on his philanthropic work with the Bill & Melinda Gates Foundation, the world's largest private charitable organization, which he and his then-wife, Melinda French Gates, co-chaired from 2000 until 2024. Focusing on areas including health, education, and poverty alleviation, Gates became known for his efforts to combat transmissible diseases such as tuberculosis, malaria, and polio. After French Gates resigned as co-chair following the couple's divorce, the foundation was renamed the Gates Foundation, with Gates as its sole chair.\nGates is the founder and chairman of several other companies, including BEN, Cascade Investment, TerraPower, Gates Ventures, and Breakthrough Energy. In 2010, he and Warren Buffett founded the Giving Pledge, whereby they and other billionaires pledged to give at least half their wealth to philanthropy. Named as one of the 100 most influential people of the 20th century by Time magazine in 1999, he has received numerous other honors and accolades, including a Presidential Medal of Freedom, awarded jointly to him and French Gates in 2016 for their philanthropic work. The subject of several documentary films, he published the first of three planned memoirs, Source Code: My Beginnings, in 2025."
+  },
+  {
+    "id": 7,
+    "klaim": "Horst D. Simon lahir pada August 8, 1953.",
+    "expected_verdict": "DIDUKUNG",
+    "reference": "Horst D. Simon (born August 8, 1953) is a computer scientist known for his contributions to high-performance computing (HPC) and computational science. He is director of ADIA Lab in Abu Dhabi, UAE and editor of TOP500."
+  },
+  {
+    "id": 8,
+    "klaim": "Wolfgang Heidrich lahir pada November 3, 1975.",
+    "expected_verdict": "DIBANTAH",
+    "reference": "Wolfgang Heidrich (born November 3, 1968) is a German-Canadian computer scientist and Professor at the King Abdullah University of Science and Technology (KAUST), for which he served as the director of Visual Computing Center from 2014 to 2021. He was previously a professor at the University of British Columbia (UBC), where he was a Dolby Research Chair (2008-2013). His research has combined methods from computer graphics, optics, machine vision, imaging, inverse methods, and perception to develop new Computational Imaging and Display technologies. His more recent interest focuses on hardware-software co-design of the next generation of imaging systems, with applications such as high dynamic range (HDR) imaging, compact computational cameras, hyper-spectral cameras, wavefront sensors, to name just a few.\nHeidrich is best known for his work in developing the high dynamic range (HDR) imaging and displays, which served as the basis for the technology behind Brightside Technologies, which was acquired by Dolby in 2007, and then later on (as part of the Dolby vision) turned into one of the core technical solutions for commercial displays.\nIn 2010, Heidrich, along with Erik Reinhard, Paul Debevec, Sumanta Pattanaik, Greg Ward, and Karol Myszkowsk, published the book High Dynamic Range Imaging: Acquisition, Display, and Image-Based Lighting, that later on became an essential resource for people working with images.\nHeidrich has been elected a Fellow of the National Academy of Inventors, ACM, Optica, IEEE, Eurographics, and AAIA. He is the recipient of the ACM SIGGRAPH Computer Graphics Achievement Award (2023), the Humboldt Research Award (2014), the Charles A. McDowell Award for Excellence in Research (2011), an NSERC Discovery Accelerator Supplement (2010), and the Peter Wall Institute for Advanced Studies Early Career Scholar Award (2002)."
+  },
+  {
+    "id": 9,
+    "klaim": "Kurt Keutzer fasih berbicara dalam lima bahasa asing.",
+    "expected_verdict": "INFO_TIDAK_CUKUP",
+    "reference": "Kurt Keutzer (born November 9, 1955) is an American computer scientist."
+  },
+  {
+    "id": 10,
+    "klaim": "Robert S. Langer lahir pada August 29, 1948.",
+    "expected_verdict": "DIDUKUNG",
+    "reference": "Robert Samuel Langer Jr. FREng (born August 29, 1948) is an American biotechnologist, businessman, chemical engineer, chemist, and inventor. He is one of the nine Institute Professors at the Massachusetts Institute of Technology.\nHe was formerly the Germeshausen Professor of Chemical and Biomedical Engineering and maintains activity in the Department of Chemical Engineering and the Department of Biological Engineering at MIT. He is also a faculty member of the Harvard–MIT Program in Health Sciences and Technology and the Koch Institute for Integrative Cancer Research.\nLanger holds over 1,400 granted or pending patents. He is one of the world's most highly cited researchers and his h-index is now (according to Google Scholar, 2026-3-8) 336 with currently over 472,000 citations. He is a widely recognized and cited researcher in biotechnology, especially in the fields of drug delivery systems and tissue engineering.\nHe is the most cited engineer in history and one of the 10 most cited individuals in any field, having authored over 1,600 scientific papers. Langer is also a prolific businessman, having been behind the participation in the founding of over 40 biotechnology companies including the well-known American pharmaceutical company, Moderna.\nLanger's research laboratory at MIT is the largest biomedical engineering lab in the world; maintaining over $10 million in annual grants and over 100 researchers. He has been awarded numerous leading prizes in recognition of his work."
+  },
+  {
+    "id": 11,
+    "klaim": "Sammy Hagar lahir pada October 13, 1937.",
+    "expected_verdict": "DIBANTAH",
+    "reference": "Samuel Roy Hagar (born October 13, 1947), also known as the Red Rocker, is an American singer, songwriter, guitarist, entrepreneur, and philanthropist. He rose to prominence in the early 1970s with the hard rock band Montrose before launching a successful solo career, scoring a hit in 1984 with \"I Can't Drive 55\". He enjoyed further commercial success as the second lead vocalist of Van Halen from 1985 through 1996, and from 2003 to 2005.\nIn 2007 Hagar was inducted into the Rock and Roll Hall of Fame as a member of Van Halen. His musical style primarily consists of hard rock and heavy metal.\nA lifelong entrepreneur, Hagar has founded four spirits brands and 13 restaurants. In 2008, with his wife, Kari Hagar, he founded a private non-profit focused on children's causes and hunger relief, the Hagar Family Foundation."
+  },
+  {
+    "id": 12,
+    "klaim": "Ruchi Sanghvi memiliki peliharaan seekor anjing bernama Max.",
+    "expected_verdict": "INFO_TIDAK_CUKUP",
+    "reference": "Ruchi Sanghvi (born 20 January 1982) is an Indian-American computer engineer and businesswoman. She was the first female engineer hired by Facebook. In late 2010, she quit Facebook and in 2011, she started her own company Cove, with two other co-founders. The company was sold to Dropbox in 2012 and Sanghvi joined Dropbox as VP of Operations. She left Dropbox in October 2013.\nIn 2016, Sanghvi established South Park Commons, a residential and professional tech space that functions similarly to a hackerspace."
+  },
+  {
+    "id": 13,
+    "klaim": "Bobby Murphy lahir pada July 19, 1988.",
+    "expected_verdict": "DIDUKUNG",
+    "reference": "Robert Cornelius Murphy (born July 19, 1988) is an American Internet entrepreneur and software engineer. He is the co-founder and the CTO of the American multinational technology company Snap Inc., which he created (as Snapchat Inc.) with Evan Spiegel and Reggie Brown while they were students at Stanford University.\nHe was named as one of the 100 most influential people in 2014 by Time. In 2015, Murphy was first listed and became the second-youngest billionaire in the world by Forbes."
+  },
+  {
+    "id": 14,
+    "klaim": "Ellie Cachette lahir pada March 17, 1970.",
+    "expected_verdict": "DIBANTAH",
+    "reference": "Désirée \"Ellie\" Cachette (born March 17, 1985) is an American investor, philanthropist and author of Software Agreements for Dummies."
+  },
+  {
+    "id": 15,
+    "klaim": "Joris Poort fasih berbicara dalam lima bahasa asing.",
+    "expected_verdict": "INFO_TIDAK_CUKUP",
+    "reference": "Joris Poort (born July 5, 1983) is an American businessman and entrepreneur. He is the founder and chief executive officer of the enterprise software firm Rescale. \nSilicon Valley insiders have referred to Poort as \"a silent genius\". He is known for developing innovative computing technologies for engineers and scientists evangelizing use of high-performance computing and supercomputing in the cloud."
+  },
+  {
+    "id": 16,
+    "klaim": "Sam Shahidi lahir pada August 1, 1983.",
+    "expected_verdict": "DIDUKUNG",
+    "reference": "Sam Shahidi (born August 1, 1983) is a businessperson and co-founder of Shots Podcast Network and CEO of Happy Dad Hard Seltzer. Also, a partner of the popular YouTube group, Nelk Boys.\nIn 2009, he and his brother John Shahidi started the video game development company RockLive, where they developed mobile games for athletes such as Cristiano Ronaldo and Mike Tyson. In 2013, RockLive became Shots Mobile before becoming Shots Podcast Network."
+  },
+  {
+    "id": 17,
+    "klaim": "Jeremy Kauffman lahir pada September 19, 2004.",
+    "expected_verdict": "DIBANTAH",
+    "reference": "Jeremy Kauffman (born September 19, 1984) is an American entrepreneur and political activist known for founding and leading the blockchain-based filesharing project LBRY. Kauffman is also known as a vocal supporter and activist within the Free State Project (FSP) and a former board member. The FSP is a movement designed to get libertarians to move to the state of New Hampshire. Kauffman was the Libertarian nominee in the 2022 United States Senate election in New Hampshire, losing to Democrat Maggie Hassan. Kauffman is known for his provocative statements made on the Libertarian Party of New Hampshire's Twitter account that have been deemed violent, racist, and anti-Semitic."
+  },
+  {
+    "id": 18,
+    "klaim": "Ben Neumann memiliki peliharaan seekor anjing bernama Max.",
+    "expected_verdict": "INFO_TIDAK_CUKUP",
+    "reference": "Ben R. Neumann (born Bernd Neumann; May 27, 1966 – February 5, 2020) was an American entrepreneur, investor, film producer and mixed martial artist, best known for founding early Internet hosting service Internet Communication Icom.com, and his subsequent investments into companies such as iBoost.com, Globat.com, FatCow.com and his work in the motion picture industry. Some of Ben's more recent ventures were the content delivery networks NetDNA, MaxCDN and HDDN, which he co-founded together with business partner and protégé Chris Ueland in October 2009. In 2011, through his consulting firm Innovative Currency, Ben ventured outside the technology field and created his unique coaching programs InspireMoreHeroes and MillionairesMentor. He helped others with his innovative way of marketing and creating leads. \nNeumann, a former bodyguard, and avid martial artist since second grade, who grew up in Krefeld, Germany in a working-class family, immigrated to the United States from Germany in 1994. While working on his martial arts career and after winning several mixed martial arts tournaments, he successfully built and sold his first U.S.-based technology company Icom.com at the pinnacle of the Dot-com bubble in 1998, a move that made him one of the original Internet pioneers. He subsequently began investing into other technology and real estate companies and became involved with film making in Los Angeles in early 2004, when he was approached by an independent filmmaker. The result of this partnership was Dark World, starring Michael Pare and Theresa Russell. Neumann also produced or was involved with other notable films and TV shows, such as American Idol, The Apprentice, Grey's Anatomy, House M.D., Only in LA, You, Me, Love and Smile of April. He continued to invest in local niche companies and became an engaged community activist. In March 2006 Neumann was elected to the Board of the Studio City Neighborhood Council and was President of the Council from March 2008 until June 2010.\nAs a successful immigrant entrepreneur, Neumann has been quoted off-line and online in numerous ezines, magazines and books. For his achievements in the technology sector he was nominated for Ernst & Young's Entrepreneur of the Year award in 2000 and 2003.\nHe died in February 2020 after suffering a heart attack."
+  },
+  {
+    "id": 19,
+    "klaim": "Steve Poizner lahir pada January 4, 1957.",
+    "expected_verdict": "DIDUKUNG",
+    "reference": "Stephen Leo Poizner (born January 4, 1957) is an American businessman and politician who served as the Insurance Commissioner of the state of California from 2007 to 2011. Formerly a Republican, Poizner ran unsuccessfully as an independent candidate in the 2018 California Insurance Commissioner election.\nPoizner has also been a Silicon Valley technology entrepreneur, founding and selling SnapTrack, Inc., Strategic Mapping, Inc, and EmpoweredU, and he is currently the founder and CEO of next generation GPS startup OneNav Inc. In 2001, following privately held SnapTrack's sale for $1 billion to Qualcomm, Poizner served a year as a White House Fellow in the National Security Council. Starting one week before the September 11 attacks, Poizner held the position of Director of Critical Infrastructure Protection, and was involved in developing Homeland Security programs relating to cybersecurity and emergency response communication protocols. As of 2025, Poizner and Arnold Schwarzenegger are the last Republicans to win or hold statewide office in California, having both won their respective elections in 2006."
+  },
+  {
+    "id": 20,
+    "klaim": "Rada Iveković lahir pada 1965 in Zagreb, Yugoslavia.",
+    "expected_verdict": "DIBANTAH",
+    "reference": "Rada Iveković (born 1945 in Zagreb, Yugoslavia) is a Croatian professor, philosopher, Indologist and writer."
+  },
+  {
+    "id": 21,
+    "klaim": "Steven Libman fasih berbicara dalam lima bahasa asing.",
+    "expected_verdict": "INFO_TIDAK_CUKUP",
+    "reference": "Steven Libman (born October 5, 1959) is an American performing-arts executive, known for leading major orchestra, dance and theatre companies and performing-arts centers with an emphasis on classical music and jazz. \nSince 2020, Libman has been the president and chief executive officer for the Jacksonville Symphony, located in Jacksonville, Florida. \nHis career spans more than three decades and he has previously served as the managing director or chief executive officer for the Pittsburgh Ballet Theatre (Pittsburgh, Pennsylvania), the La Jolla Playhouse (La Jolla, California), and The Palladium at the Center for the Performing Arts (Carmel, Indiana). He has also served as the chief advancement officer for the Atlanta Ballet (Atlanta, Georgia). \nLibman is also a public speaker and was the co-host and co-founder of The Voice of the Performing Arts, a weekly public-radio show devoted to the importance of arts education."
+  },
+  {
+    "id": 22,
+    "klaim": "William Harper Carter lahir pada August 15, 1939.",
+    "expected_verdict": "DIDUKUNG",
+    "reference": "William Harper \"Bill\" Carter (born August 15, 1939) is an American businessman and former child actor. Using the stage name Harper Carter, he acted in several films as a child, notably the 1953 film Titanic, and appeared in adult roles in the late 1960s and early 1970s in film and television. In 1974, he moved to Westlake Village, California, and began working in real estate. In 1992 he became executive vice president of Sotheby's International Realty. Teamed with a fellow real estate agent, he has listed and sold more than one billion dollars in property."
+  },
+  {
+    "id": 23,
+    "klaim": "Oscar Munoz (executive) lahir pada January 5, 1944.",
+    "expected_verdict": "DIBANTAH",
+    "reference": "Oscar Munoz (born January 5, 1959) is an American businessman and board member, who was executive chairman of United Airlines from 2020 to 2021, after having been chief executive officer (CEO) of United Airlines from 2015 to 2020. Prior to his role at United Airlines, Munoz was on the board of parent company United Continental Holdings and held executive positions at CSX Corporation and AT&T.\nIn December 2019, Munoz announced that he would transition to the role of executive chairman of the board in May 2020. President Scott Kirby took over the CEO role from Munoz in May 2020 at United's annual meeting."
+  },
+  {
+    "id": 24,
+    "klaim": "Lawrence Pileggi memiliki peliharaan seekor anjing bernama Max.",
+    "expected_verdict": "INFO_TIDAK_CUKUP",
+    "reference": "Lawrence Pileggi (born Lawrence Pillage, March 14, 1962) is the Coraluppi Head and Tanoto Professor of Electrical and Computer Engineering at Carnegie Mellon University. His research is in the automation of integrated circuits, and developing software tools for the optimization of power grids. He is also a Senior Energy Fellow at CMU's Scott Institute and has contributed to the modernization of electric grid analysis and simulation methods."
+  },
+  {
+    "id": 25,
+    "klaim": "Donald A. Nixon lahir pada December 12, 1945.",
+    "expected_verdict": "DIDUKUNG",
+    "reference": "Donald Anthony Nixon (born December 12, 1945) is an American businessman. He is the nephew of former President Richard Nixon and the son of Richard Nixon's brother Donald Nixon and Clara Jane Lemke."
+  },
+  {
+    "id": 26,
+    "klaim": "Michael Freeden lahir pada 30 April 1951.",
+    "expected_verdict": "DIBANTAH",
+    "reference": "Michael Freeden (born 30 April 1944) is a British political scientist who is an Emeritus Professor of Politics at University of Oxford and Professorial Fellow at Mansfield College. He is a leading theorist of ideology and the founding editor of the Journal of Political Ideologies."
+  },
+  {
+    "id": 27,
+    "klaim": "Jyoti Bansal fasih berbicara dalam lima bahasa asing.",
+    "expected_verdict": "INFO_TIDAK_CUKUP",
+    "reference": "Jyoti Bansal (born May 6, 1977) is an Indian-American technology entrepreneur. He founded his first company AppDynamics in April 2008, and went on to serve as CEO until 2015. AppDynamics was acquired by Cisco Systems for $3.7 billion, a day before AppDynamics was due for an initial public offering. He later founded additional technology companies, including Harness and Traceable, and serves as the co-founder and CEO of Harness. He also co-founded the venture capital firm Unusual Ventures and the start-up studio BIG Labs.\nAs of 2026, Bansal has a net worth of US$ 2.3 billion."
+  },
+  {
+    "id": 28,
+    "klaim": "John Rose (Tennessee politician) lahir pada February 23, 1965.",
+    "expected_verdict": "DIDUKUNG",
+    "reference": "John Williams Rose (born February 23, 1965) is an American politician and businessman serving as the U.S. representative for Tennessee's 6th congressional district since 2019. A member of the Republican Party, he previously served as the 33rd agriculture commissioner of Tennessee from 2002 to 2003.\nRose is currently a candidate for the Republican nomination for Governor of Tennessee in the 2026 gubernatorial election."
+  },
+  {
+    "id": 29,
+    "klaim": "Maria Kang lahir pada 1965 in San Francisco, California.",
+    "expected_verdict": "DIBANTAH",
+    "reference": "Maria M. Kang-Casler (born 1980 in San Francisco, California), is an American fitness advocate, coach, blogger, and founder of the No Excuse Mom movement, a nonprofit organization which promotes a healthy lifestyle, centered on diet and exercise, for mothers. Residing in the Sacramento, California area, Kang began competing in beauty and fitness competitions as a teenager, winning several including Miss Petite Teen International, Miss Philippines USA, and Miss Bikini California.\nAfter leaving competition, Kang founded the Fitness Without Borders nonprofit organization to advocate for fitness in disadvantaged communities. In 2012, after marrying and giving birth to three sons, Kang posted a photograph of herself in exercise clothes with her children on her exercise group's Facebook page with the caption, \"What's Your Excuse?\". A year later, the photo went viral and received national media attention.\nIn January 2014, Kang founded No Excuse Mom and made appearances on local and national media to opine on lifestyle issues. As of mid-2015, approximately 300 No Excuse Mom workout groups had been established in the United States and 25 other countries with 70,000 participants. The groups hold weekly, free workouts aimed primarily at mothers of young children. In March 2015, Kang published her first book with the goal of providing readers with a simplified approach to making a healthy change in lifestyle."
+  },
+  {
+    "id": 30,
+    "klaim": "Preslav Nakov memiliki peliharaan seekor anjing bernama Max.",
+    "expected_verdict": "INFO_TIDAK_CUKUP",
+    "reference": "Preslav Nakov (born on 26 January 1977 in Veliko Turnovo, Bulgaria) is a computer scientist who works on natural language processing. He is particularly known for his research on fake news detection, automatic detection of offensive language, and biomedical text mining. Nakov obtained a PhD in computer science under the supervision of Marti Hearst from the University of California, Berkeley. He was the first person to receive the prestigious John Atanasov Presidential Award for achievements in the development of the information society by the President of Bulgaria."
+  },
+  {
+    "id": 31,
+    "klaim": "Robert G. Card lahir pada February 1953.",
+    "expected_verdict": "DIDUKUNG",
+    "reference": "Robert Gordon Card (born February 1953) is an American businessman, engineer, and former government employee who served as the CEO of SNC-Lavalin, Canada's largest engineering and construction firm."
+  },
+  {
+    "id": 32,
+    "klaim": "Joe Lonsdale lahir pada 1967 or 1983.",
+    "expected_verdict": "DIBANTAH",
+    "reference": "Joseph Lonsdale (born 1982 or 1983) is an American entrepreneur and venture capitalist. He co-founded Palantir Technologies, Addepar, and OpenGov, and co-founded and works as the managing partner at the technology investment firm 8VC.\nLonsdale began his career as an intern at PayPal, then worked as an early executive at Clarium Capital, a hedge fund run by Lonsdale's mentor, Peter Thiel. In 2004, he, Thiel, and three others co-founded Palantir. Lonsdale left Palantir in 2009.\nIn 2009, he co-founded Addepar, a wealth management technology company. In 2011, Lonsdale co-founded the venture capital firm Formation 8, and in 2015, he founded the technology investment firm 8VC.\nLonsdale has been outspoken about politics, and is an active Republican donor and fundraiser. He founded the conservative Cicero Institute think tank and co-founded the private University of Austin."
+  },
+  {
+    "id": 33,
+    "klaim": "Vijay Menon (writer) fasih berbicara dalam lima bahasa asing.",
+    "expected_verdict": "INFO_TIDAK_CUKUP",
+    "reference": "Vijay Menon (born 1990s) is an American writer and financial technology entrepreneur. He is the author of the travel memoir A Brown Man in Russia: Lessons Learned on the Trans-Siberian (2018) and the founder and CEO of Butter Payments, a startup that uses machine learning to reduce revenue loss from failed subscription transactions. He was also named to Forbes 30 Under 30 (Enterprise Technology) in 2023."
+  },
+  {
+    "id": 34,
+    "klaim": "Andrew Paradise lahir pada 10 April 1982.",
+    "expected_verdict": "DIDUKUNG",
+    "reference": "Andrew Paradise (born 10 April 1982) is an American entrepreneur and the CEO and founder of Skillz, an eSports company that enables tournaments in mobile games.\nHe previously founded AisleBuyer (sold to Intuit) and Double Picture (sold to MPA Inc.). Also, Andrew Paradise was one of the Top-Earning Game CEOs in 2020."
+  },
+  {
+    "id": 35,
+    "klaim": "Eric Bina lahir pada October 1984.",
+    "expected_verdict": "DIBANTAH",
+    "reference": "Eric J. Bina (born October 1964) is an American software programmer who is the co-creator of Mosaic and the co-founder of Netscape. In 1993, Bina along with Marc Andreessen authored the first version of Mosaic while working as a programmer at National Center for Supercomputing Applications (NCSA) at the University of Illinois at Urbana-Champaign.\nBina attended the University of Illinois at Urbana-Champaign, graduating from there with a Bachelor of Science degree in Computer Science in 1986 and a master's degree in 1988. He joined NCSA in 1991 as a programmer. There, Bina and Andreessen started working on Mosaic in December 1992 and had a working version by March 1993. Mosaic was posted to the Internet and is famed as the first killer application that popularized the Internet. He is one of the five inaugural inductees to the World Wide Web Hall of Fame announced at the first international conference on the World Wide Web in 1994.\nIn 1995, Bina and Andreessen were awarded the ACM Software System Award.\nIn 2010, Bina and Andreessen were inducted into the University of Illinois Engineering Hall of Fame."
+  },
+  {
+    "id": 36,
+    "klaim": "Barack Obama memiliki peliharaan seekor anjing bernama Max.",
+    "expected_verdict": "INFO_TIDAK_CUKUP",
+    "reference": "Barack Hussein Obama II (born August 4, 1961) is an American politician who served as the 44th president of the United States from 2009 to 2017. A member of the Democratic Party, he was the first African American president. Obama previously served as a U.S. senator representing Illinois from 2005 to 2008 and as an Illinois state senator from 1997 to 2004.\nBorn in Honolulu, Obama graduated from Columbia University in 1983 with a Bachelor of Arts degree in political science and later worked as a community organizer in Chicago. In 1988, Obama enrolled in Harvard Law School, where he was the first Black president of the Harvard Law Review. He became a civil rights attorney and an academic, teaching constitutional law at the University of Chicago Law School from 1992 to 2004. In 1996, Obama was elected to represent the 13th district in the Illinois Senate, a position he held until 2004, when he successfully ran for the U.S. Senate. In the 2008 presidential election, after a close primary campaign against Hillary Clinton, he was nominated by the Democratic Party for president. Obama selected Joe Biden as his running mate and defeated Republican nominee John McCain and his running mate Sarah Palin.\nObama was awarded the 2009 Nobel Peace Prize for efforts in international diplomacy, a decision that drew both praise and criticism. During his first term, his administration responded to the 2008 financial crisis with measures including the American Recovery and Reinvestment Act of 2009 to address the Great Recession; a partial extension of the Bush tax cuts; legislation to reform health care; and the Dodd–Frank Wall Street Reform and Consumer Protection Act, a major financial regulation reform bill. Obama also appointed Supreme Court justices Sonia Sotomayor and Elena Kagan, the former being the first Hispanic American on the Supreme Court. Obama also oversaw the end of the Iraq War and ordered Operation Neptune Spear, the raid that killed Osama bin Laden, who was the leader of Al-Qaeda and was responsible for the September 11 attacks. He downplayed Bush's counterinsurgency model by expanding air strikes and making extensive use of special forces, while encouraging greater reliance on host-government militaries. Obama also ordered the 2011 military intervention in Libya to implement United Nations Security Council Resolution 1973, which contributed to the overthrow of Muammar Gaddafi.\nObama defeated Republican opponent Mitt Romney and his running mate Paul Ryan in the 2012 presidential election. In his second term, Obama advocated for gun control in the wake of the Sandy Hook Elementary School shooting, took steps to combat climate change by signing the Paris Agreement on climate change and an executive order to limit carbon emissions, and presided over the implementation of the Affordable Care Act and other legislation passed during his first term. Obama also initiated sanctions against Russia following its invasion in Ukraine and again after Russian interference in the 2016 U.S. elections. He ordered military intervention in Iraq after gains made by ISIL following the 2011 withdrawal from Iraq, negotiated the Joint Comprehensive Plan of Action (a nuclear agreement with Iran), and normalized relations with Cuba. The number of American soldiers in Afghanistan decreased during Obama's second term, though U.S. soldiers remained in the country throughout his presidency. He also promoted inclusion for LGBT Americans, becoming the first sitting U.S. president to publicly support same-sex marriage.\nObama left office in 2017. He remains politically active, campaigning for candidates in American elections, including in Biden's successful presidential bid in the 2020 presidential election. Outside politics, Obama has published three books: Dreams from My Father (1995), The Audacity of Hope (2006), and A Promised Land (2020). His presidential library began construction in the South Side of Chicago in 2021 and is set to open in June 2026. Historians and political scientists rank Obama highly in historical rankings of U.S. presidents."
+  },
+  {
+    "id": 37,
+    "klaim": "Adolfo Pérez Esquivel lahir pada 26 November 1931.",
+    "expected_verdict": "DIDUKUNG",
+    "reference": "Adolfo Pérez Esquivel (born 26 November 1931) is an Argentine activist, community organizer, painter, writer and sculptor. He was the recipient of the 1980 Nobel Peace Prize for his opposition to Argentina's last civil-military dictatorship (1976–1983), during which he was detained, tortured, and held without trial for 14 months. He also received, among other distinctions, the Pacem in Terris Award."
+  },
+  {
+    "id": 38,
+    "klaim": "Peter Rojas lahir pada March 18, 1987.",
+    "expected_verdict": "DIBANTAH",
+    "reference": "Peter Rojas (born March 18, 1975) is the co-founder of technology blogs Gizmodo and Engadget, as well as the video gaming blog Joystiq (2004)."
+  },
+  {
+    "id": 39,
+    "klaim": "Lecrae fasih berbicara dalam lima bahasa asing.",
+    "expected_verdict": "INFO_TIDAK_CUKUP",
+    "reference": "Lecrae Devaughn Moore (born October 9, 1979) is an American Christian rapper, singer-songwriter, actor, and recording producer and executive. Since having begun his career in 2004, he has released ten studio albums and four mixtapes as a solo artist, as well as recording with the hip-hop collective 116, which he co-founded.\nLecrae's first two studio albums, Real Talk (2004) and After the Music Stops (2006), were both released independently and met with critical praise. His third, Rebel (2008), became the first Christian hip-hop album to peak atop the Billboard Top Gospel Albums, and his first to enter the Billboard 200. After the release of his fourth album, Rehab (2010), Lecrae began attracting mainstream attention following his performance at the 2011 BET Hip Hop Awards Cypher, and his guest appearance on Statik Selektah's single \"Live and Let Live\" that same year. His sixth album, Gravity (2012), and has been called the most important album in Christian hip hop history by Rapzilla and Atlanta Daily World. Along with continued critical praise, it peaked at number three on the Billboard 200 and made Lecrae the first hip hop artist to win in the category of Best Gospel Album — at the 55th Annual Grammy Awards. His seventh album, Anomaly (2014), became his first to debut atop the Billboard 200, as well as the first album to peak both the Billboard 200 and Top Gospel Album charts simultaneously.\nIn May 2016, Lecrae signed with Columbia Records. He released his third mixtape, Church Clothes 3 (2016), his eighth album, All Things Work Together (2017), and his collaborative album with American record producer Zaytoven, Let the Trap Say Amen (2018). He left Columbia in early 2020, and released his tenth album, Restoration, in August of that year.\nHe has co-founded three media entities: the record label Reach Records in 2004, the now-defunct non-profit organization ReachLife Ministries in 2007, and the film production studio 3 Strand Films in 2019.\nLecrae received nominations for Artist of the Year at the 43rd, 44th, 45th, and 46th GMA Dove Awards, the last of which he won, and for Best Gospel Artist at the 2013 and 2015 BET Awards, the latter of which he won, a first for a rap artist. Lecrae's filmography includes a role in the television film A Cross to Bear (2012) and brief roles in the comedy film Believe Me (2014), crime film Superfly (2018), and Christian drama film Breakthrough (2019). Lecrae has presented on and written about racial tension and injustice in the United States as well as advocated for the preservation of responsibility and fatherhood values among men in the United States. In 2013, he partnered with Dwyane Wade and Joshua DuBois in the multimedia initiative This Is Fatherhood as part of the Obama administration's Fatherhood and Mentoring Initiative, and in 2020 during the COVID-19 pandemic worked with Love Beyond Walls to distribute hand-washing stations and food to homeless people in Atlanta."
+  },
+  {
+    "id": 40,
+    "klaim": "Tom Preston-Werner lahir pada May 27, 1979.",
+    "expected_verdict": "DIDUKUNG",
+    "reference": "Thomas Preston-Werner (born May 27, 1979) is an American software developer and billionaire entrepreneur. He is an active contributor within the free and open-source software community, most prominently in the San Francisco Bay Area, where he lives.\nHe is best known as a co-founder and former CEO of GitHub, a web-based Git repository hosting service, which he co-founded in 2008 with Chris Wanstrath and P. J. Hyett. He resigned from GitHub in 2014 when an internal investigation concluded that he and his wife harassed an employee. Preston-Werner is also the creator of the avatar service Gravatar, the TOML configuration file format, the static site generator software Jekyll, and the Semantic Versioning Specification (SemVer). As of 2023, he and his wife have committed to The Giving Pledge—a promise to give away or donate a majority of their wealth to philanthropic causes."
+  },
+  {
+    "id": 41,
+    "klaim": "Jeffrey M. Jaffe lahir pada 21 July 1974.",
+    "expected_verdict": "DIBANTAH",
+    "reference": "Jeffrey M. Jaffe (born 21 July 1954) is a computer science researcher, who also served as an executive in several companies/non-public organizations across multiple industries, including computing systems, telecommunications, software, and web. \nHe is perhaps best known for his long-term leadership (2010-2022) of the World Wide Web Consortium (W3C), the main international standards organization for the World Wide Web. He was named one of the Most Influential People in IT of 2011by Tom's Hardware.\nHe was inducted as an IEEE Fellow for contributions to routing and flow control in computer networks and as an ACM Fellow for outstanding achievements in the development of effective and influential distributed routing algorithms for peer networking and for many professional contributions to computer communication research.\nAfter retiring from the business world he began investigating religious philosophy and is the author of several books incorporating a new approach to the text of the Hebrew Bible."
+  },
+  {
+    "id": 42,
+    "klaim": "Rod Canion memiliki peliharaan seekor anjing bernama Max.",
+    "expected_verdict": "INFO_TIDAK_CUKUP",
+    "reference": "Joseph Rodney \"Rod\" Canion (born January 19, 1945) is an American computer scientist and businessman who co-founded Compaq Computer Corporation in 1982 and served as its first president and CEO."
+  },
+  {
+    "id": 43,
+    "klaim": "Andy Rubin lahir pada March 13, 1963.",
+    "expected_verdict": "DIDUKUNG",
+    "reference": "Andrew E. Rubin (born March 13, 1963) is an American computer programmer, entrepreneur, and venture capitalist. Rubin founded Danger Inc. in 1999 and left in 2003; Danger was eventually acquired by Microsoft in 2008. Rubin founded Android Inc. in 2003, which was acquired by Google in 2005; Rubin served as a Google vice president for nine years and led Google's efforts in creating and promoting the Android operating system for mobile phones and other devices during most of his tenure. Rubin left Google in 2014, initially presented as a voluntary departure; but later revealed to be a dismissal due to allegations of sexual harassment by Rubin. Rubin then served as co-founder and CEO of venture capital firm Playground Global from 2015 to 2019. Rubin also helped found Essential Products in 2015, a mobile phone start-up that closed in 2020 without finding a buyer. In 2019, Rubin was inducted into the Wireless Hall of Fame."
+  },
+  {
+    "id": 44,
+    "klaim": "Rob Fishman lahir pada March 31, 2006.",
+    "expected_verdict": "DIBANTAH",
+    "reference": "Rob Fishman (born March 31, 1986) is an American entrepreneur and writer."
+  },
+  {
+    "id": 45,
+    "klaim": "Guillermo Söhnlein fasih berbicara dalam lima bahasa asing.",
+    "expected_verdict": "INFO_TIDAK_CUKUP",
+    "reference": "Guillermo Söhnlein (born May 18, 1966) is an Argentine-American businessman, best known as the co-founder of deep-sea exploration company OceanGate. Söhnlein left the company in 2013, retaining a minority stake."
+  },
+  {
+    "id": 46,
+    "klaim": "Gustavo Arellano lahir pada October 13, 1979.",
+    "expected_verdict": "DIDUKUNG",
+    "reference": "Gustavo Arellano (born October 13, 1979) is a Mexican American writer and journalist. He is a columnist for the Los Angeles Times and the former editor of Orange County's alternative weekly OC Weekly."
+  },
+  {
+    "id": 47,
+    "klaim": "Justin Schwartz lahir pada February 9, 1955.",
+    "expected_verdict": "DIBANTAH",
+    "reference": "Justin Schwartz (born February 9, 1965) is an American nuclear engineer and chancellor at the University of Colorado Boulder, a position he has held since July 1, 2024. He has spent his career as a researcher, educator, entrepreneur and academic leader.\nFrom August 2022 until his appointment at CU Boulder, Schwartz was the interim and then permanent executive vice president and provost at The Pennsylvania State University. He previously served as Harold and Inge Marcus Dean at Penn State College of Engineering from 2017 to 2022 and head of the Department of Materials Science and Engineering at North Carolina State University from 2009 to 2017."
+  },
+  {
+    "id": 48,
+    "klaim": "Freddie Figgers memiliki peliharaan seekor anjing bernama Max.",
+    "expected_verdict": "INFO_TIDAK_CUKUP",
+    "reference": "Freddie Figgers (born September 26, 1989) is an American technology entrepreneur, inventor, and founder of Figgers Communication and the Figgers Foundation."
+  },
+  {
+    "id": 49,
+    "klaim": "Angel Rich lahir pada December 2, 1986.",
+    "expected_verdict": "DIDUKUNG",
+    "reference": "Angel Rich (born December 2, 1986) is an African American tech entrepreneur, author, and convicted felon."
+  },
+  {
+    "id": 50,
+    "klaim": "Jan Koum lahir pada February 24, 1961.",
+    "expected_verdict": "DIBANTAH",
+    "reference": "Jan Borysovych Koum (born February 24, 1976) is an American billionaire businessman and computer programmer. He is the co-founder and former CEO of WhatsApp, a mobile messaging app which was acquired by Facebook in 2014 for US$19.3 billion. According to Forbes, he has an estimated net worth of US$15.2 billion as of October 2023, making him one of the richest people in the world. Koum was ranked 44th on the Forbes' list of richest Americans in 2023 with a net worth of $15.1 billion."
+  },
+  {
+    "id": 51,
+    "klaim": "Tony Fadell fasih berbicara dalam lima bahasa asing.",
+    "expected_verdict": "INFO_TIDAK_CUKUP",
+    "reference": "Anthony Michael Fadell (born March 22, 1969) is an American engineer, designer, entrepreneur, and investor. He was senior vice president of the iPod division at Apple Inc. and founder and former CEO of Nest Labs.\nFadell joined Apple Inc. in 2001 and oversaw all iPod hardware, software, and accessories development. He is known as the \"father of the iPod\". As the co-creator of the iPhone, he also worked on the first three generations of the iPhone and oversaw all iPhone hardware, firmware, and accessories development from March 2006 to November 2008.\nIn May 2010, he co-founded Nest Labs, which announced its first product, the Nest Learning Thermostat, in October 2011. Nest was acquired by Google in January 2014 for $3.2B.\nFadell has authored more than 300 patents and was named one of Time's \"100 Most Influential People in the World\" in 2014. In 2016 Time named the Nest Learning Thermostat, the iPod and the iPhone as three of the “50 Most Influential Gadgets of All Time\"."
+  },
+  {
+    "id": 52,
+    "klaim": "Jessica Uhl lahir pada January 29, 1968.",
+    "expected_verdict": "DIDUKUNG",
+    "reference": "Jessica Rodgers Uhl (born January 29, 1968) is an American business executive. She is the former president of GE Vernova, the vice chair of Mission Possible Partnership, an independent director of Goldman Sachs, and a member of the School of International and Public Affairs, Columbia University (SIPA) Center on Global Energy Policy advisory board. She is a former CFO of Shell and serves as a director. She has been recognized as one of the top 50 \"Most Powerful Women\" by Forbes for her global leadership, and by Fortune for her business leadership."
+  },
+  {
+    "id": 53,
+    "klaim": "Sky Dayton lahir pada August 8, 1991.",
+    "expected_verdict": "DIBANTAH",
+    "reference": "Sky Dylan Dayton (born August 8, 1971) is an American entrepreneur and investor. He is the founder of Internet service provider EarthLink, co-founder of eCompanies, the founder of Boingo, and co-founder of City Storage Systems and CloudKitchens."
+  },
+  {
+    "id": 54,
+    "klaim": "Glen Moreno memiliki peliharaan seekor anjing bernama Max.",
+    "expected_verdict": "INFO_TIDAK_CUKUP",
+    "reference": "Glen Richard Moreno (born 24 July 1943) is an American businessman. Moreno has worked for several large companies in the United States and the United Kingdom, and worked as acting-chairman of UK Financial Investments Limited which manages the British government's bank shareholdings. He has been Chairman of Virgin Money UK since May 2015."
+  },
+  {
+    "id": 55,
+    "klaim": "Tim Armstrong (executive) lahir pada December 21, 1970.",
+    "expected_verdict": "DIDUKUNG",
+    "reference": "Timothy M. Armstrong (born December 21, 1970) is an American business executive. He was formerly the CEO of Oath Inc., then a subsidiary of Verizon Communications that served as the umbrella company of its digital content subdivisions, including AOL and Yahoo!. Previously, he was the CEO of AOL Inc. from 2009 until its purchase by Verizon in 2015. Currently AOL is owned by Yahoo Inc., and is managed by Yahoo Senior Executive, Brendan Jennings. \nArmstrong began his career in journalism, becoming known for his online advertising sales in the 1990s. He was appointed marketing director for Seattle-based online entertainment-and-news portal Starwave, which was acquired by Disney in 1998. He was vice-president of sales at the New York-based news-and-gaming company Snowball in 2000. He became Vice President for Advertising Sales at Google, and later became President of Google Americas operations. He replaced the outgoing Randy Falco as CEO of AOL in 2009."
+  },
+  {
+    "id": 56,
+    "klaim": "Christopher Darden lahir pada April 7, 1941.",
+    "expected_verdict": "DIBANTAH",
+    "reference": "Christopher Allen Darden (born April 7, 1956) is an American lawyer, author, and lecturer. He worked for 15 years in the Los Angeles County District Attorney's office, where he gained national attention as a co-prosecutor in the murder trial of O. J. Simpson."
+  },
+  {
+    "id": 57,
+    "klaim": "Geneva G. Belford fasih berbicara dalam lima bahasa asing.",
+    "expected_verdict": "INFO_TIDAK_CUKUP",
+    "reference": "Geneva Grosz Belford (born May 18, 1932) was a computer scientist who worked at the University of Illinois. She worked at the University of Illinois for over 40 years and advised over 140 graduate students including Thomas M. Siebel and Charles E. Roberts.\nBelford was an contributor for Britannica and worked on their article on computer science. She also co-authored a textbook on the Pascal programming language. Her papers are located at the University of Illinois Archives."
+  },
+  {
+    "id": 58,
+    "klaim": "Austin Russell (entrepreneur) lahir pada March 14, 1995.",
+    "expected_verdict": "DIDUKUNG",
+    "reference": "Austin Russell (born March 14, 1995) is an American entrepreneur, founder and former CEO of now bankrupt Luminar Technologies. Luminar specializes in lidar and machine perception technologies, mainly used in autonomous cars. Luminar went public in December 2020, temporarily making him a billionaire, though his wealth was largely derived from stock sales executed prior to Luminar's financial collapse. In May 2023, Russell began negotiating a contract to become the majority owner of Forbes, but the deal fell through in November after Russell was unable to fund it. In December 2025, Luminar filed for Chapter 11 bankruptcy, and Russell became the subject of legal proceedings involving bankruptcy discovery obligations, a defaulted personal loan, and employment allegations. His Pacific Palisades mansion, purchased for $83 million in 2021, was destroyed in the January 2025 Palisades Fire and later declared a public nuisance."
+  },
+  {
+    "id": 59,
+    "klaim": "Ben Silbermann lahir pada July 14, 1972.",
+    "expected_verdict": "DIBANTAH",
+    "reference": "Ben Silbermann (born July 14, 1982) is an American Internet entrepreneur. He is the co-founder and executive chairman of Pinterest, a visual discovery engine which lets users organize images, links, recipes and other things."
+  },
+  {
+    "id": 60,
+    "klaim": "Dirk Gates memiliki peliharaan seekor anjing bernama Max.",
+    "expected_verdict": "INFO_TIDAK_CUKUP",
+    "reference": "Dirk I. Gates (born June 25, 1961 in Fort Wayne, Indiana) is an American businessman, founder and chief executive officer of two companies, Xircom and Xirrus."
+  },
+  {
+    "id": 61,
+    "klaim": "Ben Horowitz lahir pada January 13, 1966.",
+    "expected_verdict": "DIDUKUNG",
+    "reference": "Benjamin Abraham Horowitz (born January 13, 1966) is an American businessman, investor, blogger, and author. He is a technology entrepreneur and co-founder of the venture capital firm Andreessen Horowitz along with Marc Andreessen. He previously co-founded and served as president and chief executive officer of the enterprise software company Opsware, which Hewlett-Packard acquired in 2007. Horowitz is the author of The Hard Thing About Hard Things: Building a Business When There Are No Easy Answers, a book about startups, and What You Do Is Who You Are: How to Create Your Business Culture."
+  },
+  {
+    "id": 62,
+    "klaim": "Mark Cuban lahir pada July 31, 1943.",
+    "expected_verdict": "DIBANTAH",
+    "reference": "Mark Cuban (born July 31, 1958) is an American businessman, entrepreneur, and television personality. He is the former principal owner and current minority owner of the Dallas Mavericks of the National Basketball Association (NBA) and co-owner of 2929 Entertainment. From 2012 to 2025, he was also one of the main \"sharks\" on the ABC reality television series Shark Tank.\nBorn in Pittsburgh, Pennsylvania, Cuban was involved in ventures from a young age, from selling garbage bags to running newspapers during a strike. He graduated from the Kelley School of Business at Indiana University Bloomington and embarked on a diverse business career that included founding MicroSolutions and Broadcast.com, both of which he sold at substantial profits and the latter being sold to Yahoo! Inc., making Cuban a billionaire. In 2002, the service was discontinued.\nCuban's investments span various industries, from technology and media to sports and entertainment. He has been a prominent figure in the NBA, known for his active involvement with the Mavericks (of which he won the 2011 NBA Championship as owner) and disputes with the league's management. In his side ventures, Cuban has been involved in philanthropy, political commentary, and reality television.\nAs of January 2026, Forbes has estimated his net worth to be US$6 billion."
+  },
+  {
+    "id": 63,
+    "klaim": "Uskali Mäki fasih berbicara dalam lima bahasa asing.",
+    "expected_verdict": "INFO_TIDAK_CUKUP",
+    "reference": "Ismo Uskali Mäki (born 8 February 1951 Helsinki) is a Finnish professor in the Department of Political and Economic Studies (Philosophy) at the University of Helsinki. He is also director of the Trends and tensions in Intellectual Integration centre, which was recently nominated \"Finnish Centre of Excellence\" in the Philosophy of the Social Sciences. Previous posts and roles have included his being a professor of philosophy at the Erasmus University of Rotterdam where he directed the Erasmus Institute for Philosophy and Economics and his being the editor of the Journal of Economic Methodology. In 1990–1991, Mäki was a Fellow at the Swedish Collegium for Advanced Study in Uppsala, Sweden.\nMäki's main research interests lie in the methodology of economics and the philosophy of the sciences including social sciences with his approach typically being described as a realist philosophy of economics. Mäki is currently serving as an Academy Professor for the Academy of Finland."
+  },
+  {
+    "id": 64,
+    "klaim": "Marco Aiello lahir pada September 3, 1972.",
+    "expected_verdict": "DIDUKUNG",
+    "reference": "Marco Aiello (born September 3, 1972) is an Italian-German computer scientist, author and professor."
+  },
+  {
+    "id": 65,
+    "klaim": "Evan Spiegel lahir pada June 4, 2010.",
+    "expected_verdict": "DIBANTAH",
+    "reference": "Evan Thomas Spiegel (born June 4, 1990) is an American businessman who is the co-founder and CEO of Snap Inc. Spiegel was the youngest billionaire in the world in 2015. As of August 2025, he had a personal net worth of $2.5 billion according to Forbes."
+  },
+  {
+    "id": 66,
+    "klaim": "Greg Kent memiliki peliharaan seekor anjing bernama Max.",
+    "expected_verdict": "INFO_TIDAK_CUKUP",
+    "reference": "Greg Kent (born July 18, 1943) is an American former professional player in the American Football League (AFL) and National Football League (NFL) for the Oakland Raiders and Detroit Lions in 1966 and 1968 as a tackle. He played at the collegiate level at the University of Utah and the University of Wisconsin–Madison."
+  },
+  {
+    "id": 67,
+    "klaim": "Tim Donnelly (politician) lahir pada May 9, 1966.",
+    "expected_verdict": "DIDUKUNG",
+    "reference": "Timothy Michael Donnelly (born May 9, 1966) is an American Republican politician who was a member of the California State Assembly, representing the 59th and 33rd districts. Before his election to the Assembly in November 2010, Donnelly was a small businessman. He resides in Twin Peaks, California. On January 22, 2013, Donnelly announced his intention to seek the Republican nomination for Governor of California in the 2014 election. He placed third in the open primary, behind incumbent governor Jerry Brown and investment banker Neel Kashkari, who contested the election in November 2014."
+  },
+  {
+    "id": 68,
+    "klaim": "Justin Bannan lahir pada April 18, 1964.",
+    "expected_verdict": "DIBANTAH",
+    "reference": "Justin Lewis Bannan (born April 18, 1979) is an American former professional football player who was a defensive tackle in the National Football League (NFL). He played college football for the Colorado Buffaloes before being selected by the Buffalo Bills in the fifth round of the 2002 NFL draft. Bannan also played for the Baltimore Ravens, Denver Broncos, St. Louis Rams, and Detroit Lions.\nIn 2019, Bannan wounded an acupuncturist when he shot her in the shoulder as she entered her treatment room, where he had been hiding. Bannan was sentenced to sixteen years imprisonment for attempted murder and felony assault in 2022."
+  },
+  {
+    "id": 69,
+    "klaim": "Robert Levitan fasih berbicara dalam lima bahasa asing.",
+    "expected_verdict": "INFO_TIDAK_CUKUP",
+    "reference": "Robert Levitan (born April 22, 1961) is an American businessman best known for his multiple entrepreneurial activities in New York City's Silicon Alley, the cluster of web and technology businesses stretching from Manhattan's Flatiron District through SoHo and TriBeCa."
+  },
+  {
+    "id": 70,
+    "klaim": "Spencer Rascoff lahir pada October 24, 1975.",
+    "expected_verdict": "DIDUKUNG",
+    "reference": "Spencer Rascoff (born October 24, 1975) is an American entrepreneur and businessman who serves as the chief executive officer of Match Group. He is the co-founder of Zillow Group, Pacaso, dot.la, Hotwire.com, and has created multiple startups through 75 & Sunny Ventures, his family office."
+  },
+  {
+    "id": 71,
+    "klaim": "Carl Chang (businessman) lahir pada February 13, 1959.",
+    "expected_verdict": "DIBANTAH",
+    "reference": "Carl Chang (born February 13, 1969) is an American entrepreneur, real estate investor, business executive, and former tennis coach. He founded the pizza chain Pieology, and is active in real estate investment businesses. He is the older brother and former coach of tennis star Michael Chang."
+  },
+  {
+    "id": 72,
+    "klaim": "Rajnish Khanna memiliki peliharaan seekor anjing bernama Max.",
+    "expected_verdict": "INFO_TIDAK_CUKUP",
+    "reference": "Rajnish Khanna (born 13 September 1966) is an Indian-American photobiologist and entrepreneur, with a focus on nutrition, health, and globally sustainable practices. Khanna is a research scientist at the Carnegie Institution at Stanford University. He is the founder of i-Cultiver, Inc. He also serves as a scientific advisor for author Deblina Bhattacharya The Chopra Foundation by Deepak Chopra."
+  },
+  {
+    "id": 73,
+    "klaim": "Marlon Dumas lahir pada 22 August 1975.",
+    "expected_verdict": "DIDUKUNG",
+    "reference": "Marlon Gerardo Dumas Menjivar (born 22 August 1975) is a Honduran computer scientist, and Professor of Software Engineering at the University of Tartu in Estonia, known for his contributions in the field of Business Process Management.\nBorn in Honduras, Dumas received his PhD in Computer Science at the University of Grenoble in France in 2000. From 2000 to 2009 he was Lecturer at the Queensland University of Technology in Brisbane, Australia. In 2007 he was appointed Professor of Software Engineering at the University of Tartu in Estonia.\nIn 2004 and 2007 Dumas was awarded the Queensland Government Fellowship to \"undertake research on service-oriented software architectures in collaboration with SAP AG.\"\nDumas is married to an Estonian, whom he has a daughter with."
+  },
+  {
+    "id": 74,
+    "klaim": "William Bratton lahir pada October 6, 1959.",
+    "expected_verdict": "DIBANTAH",
+    "reference": "William Joseph Bratton CBE (born October 6, 1947) is an American businessman and former law enforcement officer who served two non-consecutive tenures as the New York City police commissioner (1994–1996 and 2014–2016) and currently one of only two NYPD commissioners to do so (the other is Raymond Kelly). He previously served as the Commissioner of the Boston Police Department (BPD) (1993–1994) and Chief of the Los Angeles Police Department (LAPD) (2002–2009). He is the only person to have led the police departments of the United States' two largest cities – New York and Los Angeles.\nBratton began his police career at the BPD before becoming police commissioner in New York, where his quality-of-life policy has been credited with reducing petty and violent crime. He was recruited to lead the LAPD in 2002, following a period when the LAPD was struggling to rebuild public trust after a series of controversies in the 1990s. Bratton presided over an era of reform and crime reduction. In January 2014, Bratton returned to the post of police commissioner in New York, and served until September 2016.\nBratton has served as an advisor on policing in several roles, including advising the British government and is currently the chairman of the Homeland Security Advisory Council for the U.S. government.\nBratton's policing style is influenced by the broken windows theory, a criminological theory of the norm-setting and signaling effect of urban disorder and vandalism on additional crime and anti-social behavior. He advocates having an ethnically diverse police force representative of the population, being tough on gangs and maintaining a strict policy toward anti-social behavior."
+  },
+  {
+    "id": 75,
+    "klaim": "Michael Milken fasih berbicara dalam lima bahasa asing.",
+    "expected_verdict": "INFO_TIDAK_CUKUP",
+    "reference": "Michael Robert Milken (born July 4, 1946) is an American financier. He is known for his role in the development of the market for high-yield bonds (\"junk bonds\"), which led to his reputation as the \"Junk Bond King\", and his conviction and sentence following a guilty plea on felony charges for violating U.S. securities laws. Milken's compensation while head of the high-yield bond department at Drexel Burnham Lambert in the late 1980s exceeded $1 billion over a four-year period, a record for U.S. income at that time. With a net worth of $6 billion as of 2022, he is among the richest people in the world.\nMilken was indicted for racketeering and securities fraud in 1989 in an insider trading investigation. In a plea bargain, he pleaded guilty to securities and reporting violations but not to racketeering or insider trading. Milken was sentenced to ten years in prison, fined $600 million (although his personal website claims $200 million), and permanently barred from the securities industry by the U.S. Securities and Exchange Commission. His sentence was later reduced to two years for cooperating with testimony against his former colleagues and for good behavior. Milken was pardoned by President Donald Trump in February 2020.\nMilken is a co-founder of the Milken Family Foundation, chairman of the Milken Institute, and founder of medical philanthropies funding research on melanoma, cancer, and other life-threatening diseases. A prostate cancer survivor, Milken has devoted significant resources to research on the disease."
+  },
+  {
+    "id": 76,
+    "klaim": "J Allard lahir pada James Allard, on January 12, 1969 in Glens Falls, New York.",
+    "expected_verdict": "DIDUKUNG",
+    "reference": "J Allard (born James Allard, on January 12, 1969 in Glens Falls, New York) is an American businessman. He is the chief executive officer of Project 529, a company that builds software for cyclists and law enforcement. Prior to starting Project 529, Allard was chief technology and experience officer for the Entertainment and Devices Division at Microsoft. He was instrumental in bringing Microsoft into the Internet age, leading the development of Internet technologies for Windows, and oversaw the company's first foray into the video game industry. Allard shipped over 30 products during his tenure at Microsoft and was a founding member of many Microsoft businesses, including Xbox, Xbox 360, Xbox Live, Windows NT and the TCP/IP product families."
+  },
+  {
+    "id": 77,
+    "klaim": "Troy Downing lahir pada March 4, 1952.",
+    "expected_verdict": "DIBANTAH",
+    "reference": "Troy Bryan Downing (born March 4, 1967) is an American politician and businessman serving as a member of the U.S. House of Representatives for Montana's 2nd congressional district since 2025. A member of the Republican Party, he previously held the office of Montana state auditor from 2021 to 2025.\nDowning ran for the United States Senate in 2018, but placed third in the Republican primary, behind then-state auditor Matt Rosendale and Yellowstone County District Judge Russell Fagg. In 2020, Downing ran for State Auditor of Montana to succeed Rosendale, who was running for the House of Representatives. He won the Republican nomination, defeating 2 other candidates, and defeated Democrat Shane Morigeau in the general election. In 2024, instead of running for a second term, Downing instead ran for the House of Representatives, also to succeed Rosendale, who retired after 2 terms. He won the Republican nomination and defeated former state house speaker John Driscoll. He will become the co-dean of Montana's congressional delegation in 2027 alongside Tim Sheehy."
+  },
+  {
+    "id": 78,
+    "klaim": "Leo Riot memiliki peliharaan seekor anjing bernama Max.",
+    "expected_verdict": "INFO_TIDAK_CUKUP",
+    "reference": "Leo Riot (born December 3, 1984) is an American professional vert skater and technology entrepreneur known for constructing a full-scale backyard vert ramp in North Carolina and for competing internationally, including at X Games Shanghai 2014. Riot began skating in 1996 and turned professional in 2006."
+  },
+  {
+    "id": 79,
+    "klaim": "Judith Estrin lahir pada 1954/1955.",
+    "expected_verdict": "DIDUKUNG",
+    "reference": "Judith \"Judy\" L. Estrin (born 1954/1955) is an American entrepreneur, business executive, and philanthropist. She co-founded eight technology companies. Estrin worked with Vinton Cerf on the Transmission Control Protocol project at Stanford University in the 1970s. She was the chief technology officer of Cisco Systems from 1998 to 2000. Since 2007, Estrin has been the CEO of JLABS, LLC, a privately held company focused on furthering innovation in business, government, and nonprofit organizations."
+  },
+  {
+    "id": 80,
+    "klaim": "Denis Lerrer Rosenfield lahir pada November 21, 1970.",
+    "expected_verdict": "DIBANTAH",
+    "reference": "Denis Lerrer Rosenfield (born November 21, 1950) is a Brazilian writer and columnist. Along with Patrícia Carlos de Andrade, Rosenfield has co-founded the Millennium Institute in 2005."
+  }
+]
