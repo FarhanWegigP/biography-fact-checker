@@ -39,3 +39,18 @@ detil tugas/
 *.png
 *.jpg
 *.jpeg
+
+# Claude Code config
+.claude/
+
+# Next.js frontend (web/) - belum jadi frontend utama
+web/node_modules/
+web/.next/
+web/.env.local
+web/*.log
+node_modules/
+
+# Eval kualitatif - cuma lokal, yang di-push cuma eval kuantitatif (evaluate.py)
+scripts/qualitative_eval.py
+qualitative_eval.csv
+qualitative_eval.xlsx
